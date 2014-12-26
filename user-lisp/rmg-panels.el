@@ -81,4 +81,4 @@
                            nil))
                t))
 
-(provide 'rmg-panels-v2)
+(provide 'rmg-panels)

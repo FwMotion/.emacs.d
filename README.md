@@ -5,8 +5,8 @@
 
 The standard environment uses the following setup:
 
-1. [Ubuntu 12.04 LTS](http://www.ubuntu.com/)
-2. [Emacs 24.3](https://launchpad.net/~cassou/+archive/emacs)
+1. [Ubuntu 14.04 LTS](http://www.ubuntu.com/)
+2. Emacs 24.3.1
 
 ### Requirements
 
@@ -20,10 +20,15 @@ The required packages need to be available:
  * Panel layout setup inspired by
    [Full of Stars: An improved Emacs Window setup][panel-layout]
  * Tips and tricks from [What the .emacs.d!?][what-the-emacs-d]
- * Many smaller customization ideas from various public .emacs.d repositories
+ * Many customization ideas from various public .emacs.d repositories,
+   including:
+   * [Fabrice Niessen's .emacs][fabrice-niessen-dot-emacs]
+   * [Willard Hughes's .emacs.d][willard-hughes-dot-emacs-dot-d]
 
 [panel-layout]: http://fullofsta.rs/2012/01/an-improved-emacs-window-setup/
 [what-the-emacs-d]: http://whattheemacsd.com/
+[fabrice-niessen-dot-emacs]: http://www.mygooglest.com/fni/.emacs
+[willard-hughes-dot-emacs-dot-d]: http://www.wilfred.me.uk/.emacs.d/init.html
 
 ## License
 

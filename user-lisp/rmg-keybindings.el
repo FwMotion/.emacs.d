@@ -22,7 +22,7 @@
 (global-set-key [remap goto-line] 'rmg-goto-line-with-feedback)
 
 ;; Editing
-(global-set-key (kbd "C-w") 'rmg-kill-region-or-backward-word)
+(global-set-key (kbd "C-w") 'rmg-kill-region-or-previous-word)
 
 ;; Join lines
 (global-set-key (kbd "M-j")

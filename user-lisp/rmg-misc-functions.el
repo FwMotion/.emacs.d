@@ -1,0 +1,31 @@
+
+(defun rmg-prev-window ()
+  "Perform the opposite operation of (other-window)"
+  (interactive)
+  (other-window -1))
+
+(defun rmg-kill-region-or-previous-word ()
+  "If a region is active, kill it. Otherwise, kill the previous word."
+  (interactive)
+  (if (region-active-p)
+      (kill-region (region-beginning) (region-end))
+    (backward-kill-word 1)))
+
+(defun rmg-goto-line-with-feedback ()
+  "Show line numbers temporarily while prompting for line number input."
+  (interactive)
+  (unwind-protect
+      (progn
+	(linum-mode 1)
+	(goto-line (read-number "Goto line: ")))
+    (linum-mode -1)))
+
+(defun rmg-comint-delchar-or-eof-or-kill-buffer (arg)
+  "Delete a character, or end the process, or kill the buffer; all depending
+upon context"
+  (interactive "p")
+  (if (null (get-buffer-process (current-buffer)))
+      (kill-buffer)
+    (comint-delchar-or-maybe-eof arg)))
+
+(provide 'rmg-misc-functions)

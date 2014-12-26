@@ -1,7 +1,11 @@
-# Ignore el-get (it will be downloaded/setup automatically)
+# Ignore package management metadata and all of el-get
+/elpa/*.txt
+/elpa/archives
+/elpa/*.signed
 /el-get/*
 
 # Ignore backups
+*~
 /backup/*
 /auto-save/*
 /auto-save-list/*
@@ -19,3 +23,6 @@
 /.org-id-locations
 /*.before_ecb_2.40*
 /srecode-map.el
+
+# Ignore site-specific customizations
+/user-lisp/site-customizations.el
