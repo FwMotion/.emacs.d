@@ -1,0 +1,2 @@
+
+(provide 'rmg-display-global)

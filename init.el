@@ -8,25 +8,24 @@
 (when (fboundp 'tool-bar-mode)
   (tool-bar-mode -1))
 
+;; Move customizations to separate file
+(setq custom-file (concat user-emacs-directory "custom.el"))
+(load custom-file 'noerror)
+
 ;; Load custom lisp
 (add-to-list 'load-path (concat user-emacs-directory "user-lisp/"))
 
 ;; Main initialization modularized as follows
 (require 'rmg-environment)
 (require 'rmg-packages)
-(require 'rmg-files)
-(require 'rmg-startup)
-;;(require 'rmg-display-global)  -- global display stuff
-;;(require 'rmg-display-console) -- hook to set up console display
-;;(require 'rmg-display-gui)     -- hook to set up GUI display
-(require 'rmg-panels)
-(require 'rmg-misc-functions)
-(require 'rmg-keybindings)
-;;(require 'rmg-codestyle-global)
-;;(require 'rmg-codestyle-javascript)
-
+(rmg-try-require 'rmg-files)
+(rmg-try-require 'rmg-startup)
+(rmg-try-require 'rmg-panels)
+(rmg-try-require 'rmg-misc-functions)
+(rmg-try-require 'rmg-keybindings)
+(rmg-try-require 'rmg-display-global)
+(rmg-try-require 'rmg-display-console)
+(rmg-try-require 'rmg-display-gui)
+(rmg-try-require 'rmg-codestyle-global)
+(rmg-try-require 'rmg-codestyle-javascript)
 (ignore-errors (require 'site-customizations))
-
-;; Move customizations to separate file
-(setq custom-file (concat user-emacs-directory "custom.el"))
-(load custom-file 'noerror)
