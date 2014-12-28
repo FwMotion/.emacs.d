@@ -10,13 +10,13 @@ package to a list of missing packages."
   (condition-case err
       ;; protected form
       (progn
-	(message "Checking for library `%s'..." feature)
-	(if (stringp feature)
-	    (load-library feature)
-	  (require feature))
-	(message "Checking for library `%s'... Found" feature))
+        (message "Checking for library `%s'..." feature)
+        (if (stringp feature)
+            (load-library feature)
+          (require feature))
+        (message "Checking for library `%s'... Found" feature))
     ;; error handler
-    (error
+    (file-error
      (progn
        (message "Checking for libary `%s'... Missing" feature)
        (add-to-list 'rmg-missing-packages-list feature 'append))
@@ -25,11 +25,11 @@ package to a list of missing packages."
 ;; ELPA set up
 (rmg-try-require 'package)
 (add-to-list 'package-archives
-	     '("marmalade" . "https://marmalade-repo.org/packages/")
-	     t)
+             '("marmalade" . "https://marmalade-repo.org/packages/")
+             t)
 (add-to-list 'package-archives
-	     '("melpa" . "http://melpa.org/packages/")
-	     t)
+             '("melpa" . "http://melpa.org/packages/")
+             t)
 
 ;; TODO(rgrimm): defcustom to select HTTP or HTTPS (default HTTPS), then act
 ;; on it. Also convert default URLs to HTTPS when requested.

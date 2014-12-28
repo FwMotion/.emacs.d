@@ -42,9 +42,18 @@
 (when (rmg-try-require 'ido-ubiquitous)
   (ido-ubiquitous-mode 1))
 
-;; smart M-x
+;; Smart M-x for M-X major mode
 (when (rmg-try-require 'smex)
   (smex-initialize))
+
+;; helm for M-x
+(when (rmg-try-require 'helm-config)
+  ;; Just to be sure; I prefer ido style for most things, actually...
+  (helm-mode -1)
+
+  ;; Other settings
+  (setq helm-prevent-escaping-from-minibuffer nil
+        helm-buffers-fuzzy-matching t))
 
 ;; undo tree
 (when (rmg-try-require 'undo-tree)

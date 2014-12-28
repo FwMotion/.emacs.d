@@ -36,7 +36,7 @@
                   (interactive)
                   (join-line -1)))
 
-;; Set input method (clear C-x C-m for Smex)
+;; Set input method (clear C-x C-m for alternate M-x)
 (global-set-key (kbd "C-M-\\") 'set-input-method)
 
 ;; Webjump
@@ -50,6 +50,9 @@
             (define-key ido-completion-map (kbd "M-o") nil)
             (define-key ido-completion-map (kbd "C-n") 'ido-next-match)
             (define-key ido-completion-map (kbd "C-p") 'ido-prev-match)))
+
+;; Make helm also a bit more sane
+(define-key helm-map (kbd "C-o") 'nil)
 
 ;;; Conditional Keybindings
 ;; Find file in project
@@ -87,15 +90,27 @@
 (when (fboundp 'org-store-link)
   (global-set-key (kbd "C-c l") 'org-store-link))
 
-;; Smart M-x
-(when (fboundp 'smex)
+;; M-x
+(when (fboundp 'helm-M-x)
   ;; Use Steve Yegge's advice to use C-x C-m
-  (global-set-key (kbd "C-x C-m") 'smex)
+  (global-set-key (kbd "C-x C-m") #'helm-M-x)
   ;; C-m gets interpreted as RET
-  (global-set-key (kbd "C-x RET") 'smex)
-  (global-set-key (kbd "M-x") 'smex)
-  (global-set-key (kbd "M-X") 'smex-major-mode-commands)
-  (global-set-key (kbd "C-c C-c M-x") 'execute-extended-command))
+  (global-set-key (kbd "C-x RET") #'helm-M-x)
+  (global-set-key (kbd "M-x") #'helm-M-x)
+  ;; Store original extended command
+  (global-set-key (kbd "C-c C-c M-x") #'execute-extended-command))
+(when (fboundp 'smex-major-mode-commands)
+  (global-set-key (kbd "M-X") #'smex-major-mode-commands))
+
+;; Help commands
+(when (fboundp 'helm-apropos)
+  (global-set-key (kbd "C-h a") #'helm-apropos))
+
+;; Buffer switching
+(when (fboundp 'helm-mini)
+  (global-set-key (kbd "C-x b") #'helm-mini))
+(when (fboundp 'helm-buffers-list)
+  (global-set-key (kbd "C-x C-b") #'helm-buffers-list))
 
 ;; Use <select> as a keybinding for end-of-line (end key over SSH)
 (unless (display-graphic-p)
@@ -122,6 +137,12 @@
           (lambda ()
             (define-key shell-mode-map
               (kbd "C-d") 'rmg/comint-delchar-or-eof-or-kill-buffer)))
+
+;; Eshell
+(add-hook 'eshell-mode-hook
+          (lambda ()
+            (define-key eshell-mode-map (kbd "<tab>") #'helm-esh-pcomplete)
+            (define-key eshell-mode-map (kbd "C-c C-l") #'helm-eshell-history)))
 
 ;;; Mouse button removal
 ;; Remap to ignore

@@ -58,7 +58,7 @@
                              "^\\*js\\*$"
                              "^\\*info\\*$"
                              "^\\*local variables\\*$"
-                             "^\\*magit\\-diff"))
+                             "^\\*magit-diff"))
   (add-to-list 'display-buffer-alist
                (cons buffer-regexp-top
                      (cons #'(lambda (buffer &optional data)
@@ -72,6 +72,7 @@
                              "^\\*Ido Completions\\*$"
                              "^\\*Quail Completions\\*$"
                              "^\\*elisp macroexpansion\\*$"
+                             "^\\*helm M-x\\*$"
                              "^\\*magit"))
   (add-to-list 'display-buffer-alist
                (cons buffer-regexp-bot

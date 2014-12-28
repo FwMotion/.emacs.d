@@ -19,8 +19,7 @@
       kept-new-versions 20  ; number of newest versions to keep
       kept-old-versions 5   ; number of old to keep
       vc-make-backup-files t; make backups even when in git/svn/etc
-      )
-(setq tramp-backup-directory-alist backup-directory-alist)
+      tramp-backup-directory-alist backup-directory-alist)
 
 ;; Auto-save
 (make-directory (concat user-emacs-directory "auto-save/") t)
@@ -81,6 +80,10 @@
 
 ;; Smex save file
 (setq smex-save-file (concat rmg:state-directory "smex-items"))
+
+;; Helm files
+(setq helm-documentation-file (concat rmg:state-directory "helm-doc.org")
+      helm-adaptive-history-file (concat rmg:state-directory "helm-history"))
 
 ;; Auto-trim trailing spaces
 (defcustom rmg-auto-update-whitespace t
