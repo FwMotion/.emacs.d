@@ -2,7 +2,7 @@
 
 ;;; Definition
 ;; Setup custom framework
-(defun rmg-setup-windows-1 ()
+(defun rmg/setup-windows-1 ()
   (interactive)
   (switch-to-buffer "*scratch*")
   (delete-other-windows)
@@ -19,7 +19,7 @@
   (setq rmg-temporary-window-top (nth 2 (window-list)))
   (setq rmg-temporary-window-bot (nth 3 (window-list))))
 
-(defun rmg-setup-windows-2 ()
+(defun rmg/setup-windows-2 ()
   (interactive)
   (switch-to-buffer "*scratch*")
   (delete-other-windows)

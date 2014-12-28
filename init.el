@@ -12,6 +12,10 @@
 (setq custom-file (concat user-emacs-directory "custom.el"))
 (load custom-file 'noerror)
 
+(defgroup rmg nil
+  "Customizations specific to my setup."
+  :prefix "rmg-")
+
 ;; Load custom lisp
 (add-to-list 'load-path (concat user-emacs-directory "user-lisp/"))
 
@@ -21,11 +25,17 @@
 (rmg-try-require 'rmg-files)
 (rmg-try-require 'rmg-startup)
 (rmg-try-require 'rmg-panels)
+(rmg-try-require 'rmg-generic-behavior)
 (rmg-try-require 'rmg-misc-functions)
-(rmg-try-require 'rmg-keybindings)
 (rmg-try-require 'rmg-display-global)
 (rmg-try-require 'rmg-display-console)
 (rmg-try-require 'rmg-display-gui)
 (rmg-try-require 'rmg-codestyle-global)
+(rmg-try-require 'rmg-codestyle-c-like)
 (rmg-try-require 'rmg-codestyle-javascript)
+(rmg-try-require 'rmg-training-wheels)
+(rmg-try-require 'rmg-keybindings)
 (ignore-errors (require 'site-customizations))
+
+(message "Missing packages: %s"
+         rmg-missing-packages-list)

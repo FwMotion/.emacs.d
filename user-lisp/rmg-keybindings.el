@@ -1,13 +1,16 @@
 ;;; Global keybindings
+;; Maximize frame
+(global-set-key (kbd "<f11>") 'rmg/toggle-maximize-frame)
+
 ;; Preferred window layout
-(global-set-key (kbd "C-x C-1") 'rmg-setup-windows-1)
-(global-set-key (kbd "C-x C-!") 'rmg-setup-windows-1)
-(global-set-key (kbd "C-x C-2") 'rmg-setup-windows-2)
-(global-set-key (kbd "C-x C-@") 'rmg-setup-windows-2)
+(global-set-key (kbd "C-x C-1") 'rmg/setup-windows-1)
+(global-set-key (kbd "C-x C-!") 'rmg/setup-windows-1)
+(global-set-key (kbd "C-x C-2") 'rmg/setup-windows-2)
+(global-set-key (kbd "C-x C-@") 'rmg/setup-windows-2)
 
 ;; Move between windows
 (global-set-key (kbd "C-o") 'other-window)
-(global-set-key (kbd "M-o") 'rmg-prev-window)
+(global-set-key (kbd "M-o") 'rmg/prev-window)
 
 ;; WoMan pages on C-h C-w (instead of emacs warranty)
 (global-set-key (kbd "C-h C-w") 'woman)
@@ -18,11 +21,14 @@
 (global-set-key (kbd "C-r") 'isearch-backward-regexp)
 (global-set-key (kbd "C-M-r") 'isearch-backward)
 
+;; Go to start of line (Do what I mean!)
+(global-set-key (kbd "C-a") 'rmg/move-beginning-of-line-dwim)
+
 ;; Goto line (remap)
-(global-set-key [remap goto-line] 'rmg-goto-line-with-feedback)
+(global-set-key [remap goto-line] 'rmg/goto-line-with-feedback)
 
 ;; Editing
-(global-set-key (kbd "C-w") 'rmg-kill-region-or-previous-word)
+(global-set-key (kbd "C-w") 'rmg/kill-region-or-previous-word)
 
 ;; Join lines
 (global-set-key (kbd "M-j")
@@ -115,7 +121,7 @@
 (add-hook 'shell-mode-hook
           (lambda ()
             (define-key shell-mode-map
-              (kbd "C-d") 'rmg-comint-delchar-or-eof-or-kill-buffer)))
+              (kbd "C-d") 'rmg/comint-delchar-or-eof-or-kill-buffer)))
 
 ;;; Mouse button removal
 ;; Remap to ignore

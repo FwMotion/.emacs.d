@@ -5,6 +5,7 @@
 /el-get/*
 
 # Ignore backups
+.#*
 *~
 /backup/*
 /auto-save/*
@@ -13,6 +14,8 @@
 # Ignore compiled and generated files
 *.elc
 .yas-compiled-snippets.el
+/elpa/jquery*/api.xml
+jquery-doc-data.el
 /state/*
 /eshell/history
 /eshell/lastdir

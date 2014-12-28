@@ -1,4 +1,3 @@
-
 (unless (display-graphic-p)
   (when (rmg-try-require 'color-theme)
     (color-theme-initialize)

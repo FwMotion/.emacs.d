@@ -20,11 +20,6 @@ package to a list of missing packages."
      (progn
        (message "Checking for libary `%s'... Missing" feature)
        (add-to-list 'rmg-missing-packages-list feature 'append))
-     nil)
-    (file-error  ; condition
-     (progn
-       (message "Checking for library `%s'... Missing" feature)
-       (add-to-list 'rmg-missing-packages-list feature 'append))
      nil)))
 
 ;; ELPA set up
