@@ -37,5 +37,13 @@
 (rmg-try-require 'rmg-keybindings)
 (ignore-errors (require 'site-customizations))
 
+;; TODOs:
+;; - org mode
+;; - ffir as replacement for ffip
+;; - flycheck
+;; - JS2-mode
+;; - key for jquery-doc -- maybe C-h C-j? Only in JS modes?
+;; - Java style
+
 (message "Missing packages: %s"
          rmg-missing-packages-list)

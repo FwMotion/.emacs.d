@@ -25,7 +25,7 @@
               (set-fringe-mode '(0 . 8))))
           t)
 
-(defcustom rmg-preferred-theme-gui 'twilight
+(defcustom rmg-preferred-theme-gui 'twilight-anti-bright
   "Preferred GUI theme"
   :type 'symbol
   :group 'rmg)
