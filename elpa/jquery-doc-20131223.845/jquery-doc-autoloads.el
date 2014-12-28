@@ -4,7 +4,7 @@
 
 
 ;;;### (autoloads (company-jquery jquery-doc-ac-prefix) "jquery-doc"
-;;;;;;  "jquery-doc.el" (21663 23190 502077 874000))
+;;;;;;  "jquery-doc.el" (21663 59995 248582 754000))
 ;;; Generated autoloads from jquery-doc.el
 
 (autoload 'jquery-doc-ac-prefix "jquery-doc" "\
@@ -22,7 +22,7 @@
 ;;;***
 
 ;;;### (autoloads nil nil ("jquery-doc-data.el" "jquery-doc-pkg.el")
-;;;;;;  (21663 23190 517155 634000))
+;;;;;;  (21663 59995 271188 911000))
 
 ;;;***
 
