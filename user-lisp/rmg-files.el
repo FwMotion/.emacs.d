@@ -85,6 +85,9 @@
 (setq helm-documentation-file (concat rmg:state-directory "helm-doc.org")
       helm-adaptive-history-file (concat rmg:state-directory "helm-history"))
 
+;; Recentf file
+(setq recentf-save-file (concat rmg:state-directory "recentf"))
+
 ;; Auto-trim trailing spaces
 (defcustom rmg-auto-update-whitespace t
   "When non-nil, automatically update whitespace (indent and trailing spaces)
