@@ -1,9 +1,11 @@
-(add-hook 'window-setup-hook
-          (lambda ()
-            (if (display-graphic-p)
-                (global-hl-line-mode 1)
-              (global-hl-line-mode -1)))
-          t)
+(when (fboundp 'hl-line-toggle-when-idle)
+  (add-hook 'window-setup-hook
+            (lambda ()
+              (if (display-graphic-p)
+                  (hl-line-toggle-when-idle 1 nil)
+                (hl-line-toggle-when-idle -1 nil)))
+            t)
+  (hl-line-when-idle-interval 2))
 
 ;; Set up the frame
 (add-hook 'window-setup-hook
