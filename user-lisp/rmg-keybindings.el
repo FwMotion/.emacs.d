@@ -13,7 +13,9 @@
 (global-set-key (kbd "M-o") 'rmg/prev-window)
 
 ;; WoMan pages on C-h C-w (instead of emacs warranty)
-(global-set-key (kbd "C-h C-w") 'woman)
+(if (fboundp 'helm-man-woman)
+    (global-set-key (kbd "C-h C-w") 'helm-man-woman)
+  (global-set-key (kbd "C-h C-w") 'woman))
 
 ;; Swap isearch and isearch-regexp
 (global-set-key (kbd "C-s") 'isearch-forward-regexp)

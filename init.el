@@ -32,6 +32,7 @@
 (rmg-try-require 'rmg-display-gui)
 (rmg-try-require 'rmg-codestyle-global)
 (rmg-try-require 'rmg-codestyle-c-like)
+(rmg-try-require 'rmg-codestyle-java)
 (rmg-try-require 'rmg-codestyle-javascript)
 (rmg-try-require 'rmg-training-wheels)
 (rmg-try-require 'rmg-keybindings)
@@ -45,5 +46,8 @@
 ;; - key for jquery-doc -- maybe C-h C-j? Only in JS modes?
 ;; - Java style
 
-(message "Missing packages: %s"
-         rmg-missing-packages-list)
+(add-hook 'after-init-hook
+          (lambda ()
+            (message "Missing packages: %s"
+                     rmg-missing-packages-list))
+          t)

@@ -53,7 +53,8 @@
 
   ;; Other settings
   (setq helm-prevent-escaping-from-minibuffer nil
-        helm-buffers-fuzzy-matching t))
+        helm-buffers-fuzzy-matching t
+        helm-man-or-woman-function 'WoMan-getpage-in-background))
 
 ;; undo tree
 (when (rmg-try-require 'undo-tree)

@@ -50,7 +50,9 @@
                              "^\\*Compile-Log\\*$"
                              "^\\*Help\\*$"
                              "^\\*Locate\\*$"
+                             "^\\*Man "
                              "^\\*Pp Eval Output\\*$"
+                             "^\\*W?o?Man "
                              "^\\*ediff.*\\*$"
                              ;; shell and eshell
                              "^\\*e?shell"
@@ -69,6 +71,7 @@
 
 ;; Match buffers to the bottom window
 (dolist (buffer-regexp-bot '("^\\*Completions\\*$"
+                             "^\\*Helm "
                              "^\\*Ido Completions\\*$"
                              "^\\*Quail Completions\\*$"
                              "^\\*elisp macroexpansion\\*$"
