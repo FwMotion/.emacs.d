@@ -1,12 +1,18 @@
 .emacs.d
 ========
 
+## Install
+
+Clone this repository into `~/.emacs.d/`
+
+On Windows `%HOME%` may be located `C:/Users/%USERNAME%/AppData/Roaming`
+
 ## Environment
 
 The standard environment uses the following setup:
 
 1. [Ubuntu 14.04 LTS](http://www.ubuntu.com/)
-2. Emacs 24.3.1
+2. Emacs 24.3.1+
 
 ## Acknowledgements
 
