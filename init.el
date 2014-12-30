@@ -8,8 +8,13 @@
 (when (fboundp 'tool-bar-mode)
   (tool-bar-mode -1))
 
+;; Fix Aquamacs behavior
+(defvar rmg:user-emacs-dir
+  (file-name-directory user-init-file)
+  "Real `user-emacs-directory' based on init-file location.")
+
 ;; Move customizations to separate file
-(setq custom-file (concat user-emacs-directory "custom.el"))
+(setq custom-file (concat rmg:user-emacs-dir "custom.el"))
 (load custom-file 'noerror)
 
 (defgroup rmg nil
@@ -17,11 +22,17 @@
   :prefix "rmg-")
 
 ;; Load custom lisp
-(add-to-list 'load-path (concat user-emacs-directory "user-lisp/"))
+(add-to-list 'load-path (concat rmg:user-emacs-dir "user-lisp/"))
 
-;; Main initialization modularized as follows
+;; Determine running environment and set up package loading
 (require 'rmg-environment)
 (require 'rmg-packages)
+
+;; Before anything else, disable Aquamacs stuff
+(when running-aquamacs
+  (rmg-try-require 'rmg-aquamacs))
+
+;; Run the rest of custom initialization
 (rmg-try-require 'rmg-files)
 (rmg-try-require 'rmg-startup)
 (rmg-try-require 'rmg-panels)
@@ -44,7 +55,6 @@
 ;; - flycheck
 ;; - JS2-mode
 ;; - key for jquery-doc -- maybe C-h C-j? Only in JS modes?
-;; - Java style
 
 (add-hook 'after-init-hook
           (lambda ()

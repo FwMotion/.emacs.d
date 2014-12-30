@@ -31,6 +31,8 @@ package to a list of missing packages."
              '("melpa" . "http://melpa.org/packages/")
              t)
 
+(setq package-user-dir (concat rmg:user-emacs-dir "/elpa"))
+
 ;; TODO(rgrimm): defcustom to select HTTP or HTTPS (default HTTPS), then act
 ;; on it. Also convert default URLs to HTTPS when requested.
 ;; Currently MELPA doesn't support HTTPS :-(

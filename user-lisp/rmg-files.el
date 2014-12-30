@@ -1,5 +1,5 @@
 (defvar rmg:state-directory
-  (concat user-emacs-directory "state/")
+  (concat rmg:user-emacs-dir "state/")
   "Location to contain all files holding \"current state\" of emacs.")
 (make-directory rmg:state-directory t)
 
@@ -11,8 +11,8 @@
 (set-selection-coding-system 'utf-8)
 
 ;; Backup
-(make-directory (concat user-emacs-directory "backup/") t)
-(setq backup-directory-alist `(("." . ,(concat user-emacs-directory "backup/")))
+(make-directory (concat rmg:user-emacs-dir "backup/") t)
+(setq backup-directory-alist `(("." . ,(concat rmg:user-emacs-dir "backup/")))
       backup-by-copying t   ; don't delink hardlinks
       version-control t     ; use version numbers on backups
       delete-old-versions t ; automatically delete excess backups
@@ -22,11 +22,11 @@
       tramp-backup-directory-alist backup-directory-alist)
 
 ;; Auto-save
-(make-directory (concat user-emacs-directory "auto-save/") t)
-(make-directory (concat user-emacs-directory "auto-save-list/") t)
+(make-directory (concat rmg:user-emacs-dir "auto-save/") t)
+(make-directory (concat rmg:user-emacs-dir "auto-save-list/") t)
 (setq auto-save-file-name-transforms
-      `((".*" ,(concat user-emacs-directory "auto-save/") t))
-      tramp-auto-save-directory (concat user-emacs-directory "auto-save/"))
+      `((".*" ,(concat rmg:user-emacs-dir "auto-save/") t))
+      tramp-auto-save-directory (concat rmg:user-emacs-dir "auto-save/"))
 
 ;; Cookies
 (setq url-cookie-file (concat rmg:state-directory "url-cookies"))
@@ -42,9 +42,13 @@
 ;; Abbreviations
 (setq abbrev-file-name (concat rmg:state-directory "abbrev_defs"))
 
+;; Desktop
+(setq revive:app-restore-path rmg:state-directory
+      revive:desktop-base-file-name "SessionDesktop.el")
+
 ;; Eshell
 (require 'eshell)
-(setq eshell-directory-name (concat user-emacs-directory "eshell/"))
+(setq eshell-directory-name (concat rmg:user-emacs-dir "eshell/"))
 (setq eshell-login-script (concat eshell-directory-name "login")
       eshell-rc-script (concat eshell-directory-name "profile"))
 
@@ -87,6 +91,10 @@
 
 ;; Recentf file
 (setq recentf-save-file (concat rmg:state-directory "recentf"))
+
+;; Org-mode stuff
+(setq org-clock-persist-file (concat rmg:state-directory "org-clock-save.el")
+      org-id-locations-file (concat rmg:state-directory "org-id-locations"))
 
 ;; Auto-trim trailing spaces
 (defcustom rmg-auto-update-whitespace t
