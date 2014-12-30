@@ -40,7 +40,9 @@
   "Preferred font height in GUI frames. Unit is tenths of a point. For
 example, standard screen DPIs will typically use 90 for 9pt font; higher DPI
 screens (17inch at 1920x1200) will typically be 110 for 11pt."
-  :type 'integer
+  :type '(choice (integer :tag "Custom")
+                 (const :tag "9pt" 90)
+                 (const :tag "11pt" 110))
   :group 'rmg)
 (rmg-add-frame-start-hooks
  (lambda ()
@@ -48,21 +50,41 @@ screens (17inch at 1920x1200) will typically be 110 for 11pt."
      (set-face-attribute 'default nil
                          :height rmg-preferred-font-height))))
 
-(defun rmg-w32-toggle-maximize-frame ()
+(defun rmg-w32-maximize-frame ()
   "Maximize the current frame in MS Windows"
   (w32-send-sys-command 61488))
-(defun rmg-x11-toggle-maximize-frame ()
+(defun rmg-w32-restore-frame ()
+  "Restore the current frame in MS Windows"
+  (w32-send-sys-command 61728))
+(defun rmg-x11-maximize-frame ()
   "Maximize the current frame in X11"
+  (x-send-client-message nil 0 nil "_NET_WM_STATE" 32
+                         '(1 "_NET_WM_STATE_MAXIMIZED_HORZ" 0))
+  (x-send-client-message nil 0 nil "_NET_WM_STATE" 32
+                         '(1 "_NET_WM_STATE_MAXIMIZED_VERT" 0)))
+(defun rmg-x11-restore-frame ()
+  "Restore the current frame in X11"
+  (x-send-client-message nil 0 nil "_NET_WM_STATE" 32
+                         '(0 "_NET_WM_STATE_MAXIMIZED_HORZ" 0))
+  (x-send-client-message nil 0 nil "_NET_WM_STATE" 32
+                         '(0 "_NET_WM_STATE_MAXIMIZED_VERT" 0)))
+(defun rmg-x11-toggle-maximize-frame ()
+  "Toggle Maximize/restore the current frame in X11"
   (x-send-client-message nil 0 nil "_NET_WM_STATE" 32
                          '(2 "_NET_WM_STATE_MAXIMIZED_HORZ" 0))
   (x-send-client-message nil 0 nil "_NET_WM_STATE" 32
                          '(2 "_NET_WM_STATE_MAXIMIZED_VERT" 0)))
-(defun rmg/toggle-maximize-frame ()
+(defun rmg/maximize-frame ()
   "Maximize the current frame depending on windowing system"
   (interactive)
   (cl-case window-system
-    (x (rmg-x11-toggle-maximize-frame))
-    (w32 (rmg-w32-toggle-maximize-frame))))
+    (x (rmg-x11-maximize-frame))
+    (w32 (rmg-w32-maximize-frame))))
+(defun rmg/toggle-maximize-frame ()
+  "Toggle frame maximization"
+  (interactive)
+  (cl-case window-system
+    (x (rmg-x11-toggle-maximize-frame))))
 
 (defcustom rmg-maximize-on-setup t
   "Auto maximize the frame when starting"
@@ -72,7 +94,7 @@ screens (17inch at 1920x1200) will typically be 110 for 11pt."
  (lambda ()
    (when (and (display-graphic-p)
               rmg-maximize-on-setup)
-     (rmg/toggle-maximize-frame))))
+     (rmg/maximize-frame))))
 
 ;; Move mouse away from point
 (rmg-add-frame-start-hooks
