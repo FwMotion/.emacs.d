@@ -28,6 +28,9 @@
       `((".*" ,(concat rmg:user-emacs-dir "auto-save/") t))
       tramp-auto-save-directory (concat rmg:user-emacs-dir "auto-save/"))
 
+;; Server auth
+(setq server-auth-dir (concat rmg:state-directory "server/"))
+
 ;; Cookies
 (setq url-cookie-file (concat rmg:state-directory "url-cookies"))
 
@@ -53,7 +56,7 @@
       eshell-rc-script (concat eshell-directory-name "profile"))
 
 ;; Exec path from shell
-(when (rmg-try-require 'exec-path-from-shell)
+(when (and (not running-on-windows) (rmg-try-require 'exec-path-from-shell))
   (exec-path-from-shell-initialize))
 
 ;; Transparently open compressed files

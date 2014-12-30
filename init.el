@@ -32,6 +32,9 @@
 (when running-aquamacs
   (rmg-try-require 'rmg-aquamacs))
 
+;; Run host-specific configuration
+(rmg-try-require (intern (concat "rmg-host-" (downcase (system-name)))))
+
 ;; Run the rest of custom initialization
 (rmg-try-require 'rmg-files)
 (rmg-try-require 'rmg-startup)

@@ -26,6 +26,9 @@
             (when (display-mouse-p)
               (setq mouse-yank-at-point t))))
 
+;; Don't make sounds
+(setq visible-bell t)
+
 ;; ido
 (ido-mode 1)
 (setq ido-auto-merge-work-directories-length -1
