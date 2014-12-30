@@ -37,4 +37,8 @@
 (global-set-key [remap aquamacs-save-buffers-kill-emacs]
                 'save-buffers-kill-emacs)
 
+;; Reset cursor types
+(setq cursor-type t
+      cursor-in-non-selected-windows t)
+
 (provide 'rmg-aquamacs)
