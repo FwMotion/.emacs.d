@@ -78,8 +78,8 @@
       (if window-options
           (progn (jail-windows-activate-layout (assoc 'active-config
                                                       window-options)))
-      (progn (push (jail-windows--build-frame-defaults)
-                   jail-windows--window-options-by-frame))))
+        (progn (push (jail-windows--build-frame-defaults)
+                     jail-windows--window-options-by-frame)))))
   (message "jail-windows-mode %sabled"
            (if (jail-windows/active-p)
                "en"
