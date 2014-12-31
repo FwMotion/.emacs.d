@@ -1,7 +1,5 @@
 ;; Use same style of keys from non-Aquamacs
 (osx-key-mode -1)
-(setq ns-command-modifier 'super
-      ns-alternate-modifier 'meta)
 
 ;; Don't use symbols like ⌘
 (setq ns-use-mac-modifier-symbols nil)
@@ -26,10 +24,8 @@
       initial-major-mode 'emacs-lisp-mode)
 
 ;; Remove a few startup items
-(setq after-init-hook (remove 'aquamacs-turn-on-buffer-offer-save-in-scratch
-                              after-init-hook))
-(setq after-init-hook (remove 'aquamacs-notice-user-settings
-                              after-init-hook))
+(remove-hook 'after-init-hook 'aquamacs-turn-on-buffer-offer-save-in-scratch)
+(remove-hook 'after-init-hook 'aquamacs-notice-user-settings)
 
 ;; And a few shutdown items
 (setq kill-emacs-query-functions (remove 'aquamacs-ask-to-save-options
@@ -38,7 +34,8 @@
                 'save-buffers-kill-emacs)
 
 ;; Reset cursor types
-(setq cursor-type t
-      cursor-in-non-selected-windows t)
+(rmg-on-frames nil nil
+               (setq cursor-type t
+                     cursor-in-non-selected-windows t))
 
 (provide 'rmg-aquamacs)

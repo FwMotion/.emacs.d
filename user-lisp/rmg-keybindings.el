@@ -1,7 +1,17 @@
-;;; Global keybindings
-;; Maximize frame
-(global-set-key (kbd "<f11>") 'rmg/toggle-maximize-frame)
+;;; Key settings
+;; Mac keys
+(when running-on-osx
+  (setq ns-alternate-modifier 'meta
+        ns-command-modifier 'super
+        ns-control-modifier 'control
+        ns-function-modifier 'none
+        ns-option-modifier 'meta
+        ns-right-option-modifier 'left
+        ns-right-control-modifier 'left
+        ns-right-command-modifier 'left
+        ns-right-alternate-modifier 'left))
 
+;;; Global keybindings
 ;; Preferred window layout
 (global-set-key (kbd "C-x C-1") 'rmg/setup-windows-1)
 (global-set-key (kbd "C-x C-!") 'rmg/setup-windows-1)

@@ -1,6 +1,7 @@
-(unless (display-graphic-p)
-  (when (rmg-try-require 'color-theme)
-    (color-theme-initialize)
-    (add-hook 'window-setup-hook #'color-theme-euphoria t)))
+(rmg-on-frames nil nil
+               (when (and (not (display-graphic-p))
+                          (rmg-try-require 'color-theme))
+                 (color-theme-initialize)
+                 (rmg-on-frames t t (color-theme-euphoria))))
 
 (provide 'rmg-display-console)

@@ -1,16 +1,3 @@
-;; Support display changes that are supposed to stick on new frames
-(defmacro rmg-add-frame-start-hooks (func)
-  "Add hooks for both emacs start and frame start."
-  `(progn
-     (add-hook 'window-setup-hook
-               ,func
-               t)
-     (add-hook 'after-make-frame-functions
-               (lambda (frame)
-                 (with-selected-frame frame
-                   (funcall ,func))
-               t))))
-
 ;; Other global display settings
 (line-number-mode 1)
 (column-number-mode 1)

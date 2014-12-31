@@ -1,40 +1,42 @@
 (when (fboundp 'hl-line-toggle-when-idle)
-  (rmg-add-frame-start-hooks
-   (lambda ()
-     (if (display-graphic-p)
-         (hl-line-toggle-when-idle 1 nil)
-       (hl-line-toggle-when-idle -1 nil))))
-  (hl-line-when-idle-interval 2))
+  (hl-line-when-idle-interval 2)
+  (rmg-on-frames nil t
+                 (if (display-graphic-p)
+                     (hl-line-toggle-when-idle 1 nil)
+                   (hl-line-toggle-when-idle -1 nil))))
 
 ;; Set up frames
-(rmg-add-frame-start-hooks
- (lambda ()
-   ;; Title format
-   (setq frame-title-format (concat "%b - "
-                                    (downcase user-login-name)
-                                    "@"
-                                    (downcase system-name)))
+(rmg-on-frames nil nil
+               ;; Title format
+               (setq frame-title-format (concat "%b - "
+                                                (downcase user-login-name)
+                                                "@"
+                                                (downcase system-name)))
 
-   ;; No scrollbars, toolbars, or tabbars
-   (when (fboundp 'scroll-bar-mode)
-     (scroll-bar-mode -1))
-   (when (fboundp 'tool-bar-mode)
-     (tool-bar-mode -1))
-   (when (fboundp 'tabbar-mode)
-     (tabbar-mode -1))
+               ;; No scrollbars, toolbars, or tabbars
+               (when (fboundp 'scroll-bar-mode)
+                 (scroll-bar-mode -1))
+               (when (fboundp 'tool-bar-mode)
+                 (tool-bar-mode -1))
+               (when (fboundp 'tabbar-mode)
+                 (tabbar-mode -1))
 
-   ;; Fringe only on the right
-   (set-fringe-mode '(0 . 8))))
+               ;; Fringe only on the right
+               (set-fringe-mode '(0 . 8)))
 
 (defcustom rmg-preferred-theme-gui 'twilight-anti-bright
   "Preferred GUI theme"
   :type 'symbol
-  :group 'rmg)
+  :group 'rmg
+  :set (lambda (_var val)
+         (set-default _var val)
+         ;; For some reason, this causes Emacs to flash a bunch and then crash
+         (load-theme val t)
+         ))
 (when (load-theme rmg-preferred-theme-gui t t)
-  (rmg-add-frame-start-hooks
-   (lambda ()
-     (when (display-graphic-p)
-       (enable-theme rmg-preferred-theme-gui)))))
+  (rmg-on-frames t nil
+                 (when (display-graphic-p)
+                   (enable-theme rmg-preferred-theme-gui))))
 
 (defcustom rmg-preferred-font-height 90
   "Preferred font height in GUI frames. Unit is tenths of a point. For
@@ -43,12 +45,16 @@ screens (17inch at 1920x1200) will typically be 110 for 11pt."
   :type '(choice (integer :tag "Custom")
                  (const :tag "9pt" 90)
                  (const :tag "11pt" 110))
-  :group 'rmg)
-(rmg-add-frame-start-hooks
- (lambda ()
-   (when (display-graphic-p)
-     (set-face-attribute 'default nil
-                         :height rmg-preferred-font-height))))
+  :group 'rmg
+  :set (lambda (_var val)
+         (set-default _var val)
+         (set-face-attribute 'default
+                             nil
+                             :height val)))
+(rmg-on-frames nil nil
+               (when (display-graphic-p)
+                 (set-face-attribute 'default nil
+                                     :height rmg-preferred-font-height)))
 
 (defun rmg-w32-maximize-frame ()
   "Maximize the current frame in MS Windows"
@@ -90,16 +96,14 @@ screens (17inch at 1920x1200) will typically be 110 for 11pt."
   "Auto maximize the frame when starting"
   :type 'boolean
   :group 'rmg)
-(rmg-add-frame-start-hooks
- (lambda ()
-   (when (and (display-graphic-p)
-              rmg-maximize-on-setup)
-     (rmg/maximize-frame))))
+(rmg-on-frames nil nil
+               (when (and (display-graphic-p)
+                          rmg-maximize-on-setup)
+                 (rmg/maximize-frame)))
 
 ;; Move mouse away from point
-(rmg-add-frame-start-hooks
- (lambda ()
-   (when (display-mouse-p)
-     (mouse-avoidance-mode 'exile))))
+(rmg-on-frames nil nil
+               (when (display-mouse-p)
+                 (mouse-avoidance-mode 'exile)))
 
 (provide 'rmg-display-gui)

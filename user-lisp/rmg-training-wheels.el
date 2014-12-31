@@ -1,13 +1,14 @@
 (when (rmg-try-require 'guide-key)
   ;; Show guides for certain sets of keybind prefixes
-  (setq guide-key/guide-key-sequence '("C-x n"
-                                       "C-x r"
-                                       "C-x v"
-                                       "C-x 4"
-                                       "C-x 5"
-                                       "C-x 6"
-                                       "C-x 8"
-                                       "C-c"))
+  (setq guide-key/guide-key-sequence '("C-x c" ; helm
+                                       "C-x n" ; narrow
+                                       "C-x r" ; rectangle
+                                       "C-x v" ; VCS
+                                       "C-x 4" ; window
+                                       "C-x 5" ; frame
+                                       "C-x 6" ; 2C 2 column
+                                       "C-x 8" ; extended chars
+                                       "C-c")) ; mode-specific
 
   ;; Show recursively
   (setq guide-key/recursive-key-sequence-flag t)
@@ -23,5 +24,9 @@
 
 (when (rmg-try-require 'jquery-doc)
   (jquery-doc-setup))
+
+;; Allow recursive minibuffers
+;;(setq enable-recursive-minibuffers t)
+;;(minibuffer-depth-indicate-mode 1)
 
 (provide 'rmg-training-wheels)

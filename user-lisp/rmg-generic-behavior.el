@@ -1,9 +1,8 @@
+;; Verify SSL/TLS
+(setq gnutls-verify-error t)
+
 ;; Apropos should cover everything
 (setq apropos-do-all t)
-
-;; Allow recursive minibuffers
-(setq enable-recursive-minibuffers t)
-(minibuffer-depth-indicate-mode 1)
 
 ;; Don't use shift to mark things
 (setq shift-select-mode nil)
@@ -21,10 +20,9 @@
 (setq default-input-method 'chinese-py)
 
 ;; Mouse yank at point, not at mouse position
-(add-hook 'window-setup-hook
-          (lambda ()
-            (when (display-mouse-p)
-              (setq mouse-yank-at-point t))))
+(rmg-on-frames nil nil
+               (when (display-mouse-p)
+                 (setq mouse-yank-at-point t)))
 
 ;; Don't make sounds
 (setq visible-bell t)
@@ -42,8 +40,8 @@
              "^node_modules$")
 
 ;; ido ubiquitous
-(when (rmg-try-require 'ido-ubiquitous)
-  (ido-ubiquitous-mode 1))
+(rmg-on-startup (when (rmg-try-require 'ido-ubiquitous)
+                  (ido-ubiquitous-mode 1)))
 
 ;; Smart M-x for M-X major mode
 (when (rmg-try-require 'smex)
@@ -55,9 +53,9 @@
   (helm-mode -1)
 
   ;; Other settings
-  (setq helm-prevent-escaping-from-minibuffer nil
-        helm-buffers-fuzzy-matching t
-        helm-man-or-woman-function 'WoMan-getpage-in-background))
+  (setq ;helm-prevent-escaping-from-minibuffer nil
+   helm-buffers-fuzzy-matching t
+   helm-man-or-woman-function 'woman))
 
 ;; undo tree
 (when (rmg-try-require 'undo-tree)

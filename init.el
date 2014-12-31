@@ -8,7 +8,7 @@
 (when (fboundp 'tool-bar-mode)
   (tool-bar-mode -1))
 
-;; Fix Aquamacs behavior
+;; Fix package loading on Aquamacs
 (defvar rmg:user-emacs-dir
   (file-name-directory user-init-file)
   "Real `user-emacs-directory' based on init-file location.")
@@ -26,6 +26,7 @@
 
 ;; Determine running environment and set up package loading
 (require 'rmg-environment)
+(require 'rmg-hooks)
 (require 'rmg-packages)
 
 ;; Before anything else, disable Aquamacs stuff
@@ -59,8 +60,5 @@
 ;; - JS2-mode
 ;; - key for jquery-doc -- maybe C-h C-j? Only in JS modes?
 
-(add-hook 'after-init-hook
-          (lambda ()
-            (message "Missing packages: %s"
-                     rmg-missing-packages-list))
-          t)
+(rmg-on-startup (message "Missing packages: %s"
+                         rmg-missing-packages-list))
