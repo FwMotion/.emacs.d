@@ -36,6 +36,8 @@
 ;; Run host-specific configuration
 (rmg-try-require (intern (concat "rmg-host-" (downcase (system-name)))))
 
+(require 'jail-windows-mode)
+
 ;; Run the rest of custom initialization
 (rmg-try-require 'rmg-files)
 (rmg-try-require 'rmg-startup)
