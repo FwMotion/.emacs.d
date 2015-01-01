@@ -1,18 +1,18 @@
 (require 'dash)
 
 (defvar jail-windows--window-options-by-frame '())
+(defvar jail-windows--registered-layouts '())
 (defconst jail-windows--default-window-options
   '((active-config . none)
-    (group-regexps . (;(group-name . ("^\\*magit" "^\\*something"))
-                      ))
-    (group-windows . (;(group-name . (#<window 1> #<window 2>))
-                      ))))
+    (groups . (;(("^\\*magit" "^\\*something else")
+                       ; . (#<window 1>))
+                       ))))
 
 
 ;;;###autoload
 (defun jail-windows/register-layout (layout-name layout-def)
-  ;; TODO
-  )
+  (add-to-list 'jail-windows--registered-layouts
+               (cons layout-name layout-def)))
 
 ;;;###autoload
 (defun jail-windows/activate-layout (layout-name)
@@ -20,28 +20,35 @@
   )
 
 (defun jail-windows--reverse-string-match-p (string regexp)
+  "Call string-match-p with reversed argument order."
   (string-match-p string regexp))
 
 (defun jail-windows--display-buffer-override (buffer alist)
   "Take over window placement... ALIST is ignored"
-  (let ((window-options (cdr (assoc (window-frame)
+  (let ((buffer-name (buffer-name buffer))
+        (window-options (cdr (assoc (window-frame)
                                     jail-windows--window-options-by-frame)))
         (available-windows (window-list (window-frame) 'nominibuf))
         (matched-group))
-    ;; TODO
-    (-each-while (cdr (assoc 'group-regexps window-options))
+    ;; For each group defined in the jail-windows' window-options
+    (-each-while (cdr (assoc 'groups window-options))
+        ;; Stop iterating when a group has matched
         (lambda (item) (not matched-group))
-      (lambda (group-regexps)
-        (let ((group-name (car group-regexps))
+      (lambda (group)
+        ;; Pull the regexp list and the window list from the group
+        (let ((regexp-list (car group))
+              (window-list (cdr group))
               (-compare-fn jail-windows--reverse-string-match-p))
-          (if (-contains? (cdr group-regexps) (buffer-name buffer))
-              (progn )
+          ;; Check if this list's regexp matches the BUFFER argument's name
+          (if (-contains? regexp-list buffer-name)
+              ;; When it does match, only use windows from this group
+              (progn
+                (setq matched-group t)
+                (setq available-windows window-list))
+            ;; When it doesn't, remove this group's windows from the list
             (progn
               (setq available-windows
-                    (-difference available-windows
-                                 (cdr (assoc group-name
-                                             (assoc 'group-windows
-                                                    window-options))))))))))
+                    (-difference available-windows window-list)))))))
 
     ;; Pick among the remaining windows
     (if (not available-windows)
@@ -59,6 +66,16 @@
                     '(jail-windows--display-buffer-override)))
                ad-do-it))
     (progn ad-do-it)))
+
+(defadvice display-buffer-other-frame (around jail-window-hook activate)
+  "Handles jailing the window"
+  (if (jail-windows/active-p)
+      (progn (let ((display-buffer-overriding-action
+                    '(jail-windows--display-buffer-override)))
+               ad-do-it))
+    (progn ad-do-it)))
+
+;; TODO: (defadvice display-buffer-other-frame ...)
 
 ;;;###autoload
 (defun jail-windows/active-p (&optional frame)
