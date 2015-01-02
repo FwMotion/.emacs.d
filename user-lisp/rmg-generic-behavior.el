@@ -50,12 +50,17 @@
 ;; helm for M-x
 (when (rmg-try-require 'helm-config)
   ;; Just to be sure; I prefer ido style for most things, actually...
+  ;; maybe not.
   (helm-mode -1)
 
   ;; Other settings
   (setq ;helm-prevent-escaping-from-minibuffer nil
    helm-buffers-fuzzy-matching t
    helm-man-or-woman-function 'woman))
+
+;; Allow recursive minibuffers (but not in helm)
+(setq enable-recursive-minibuffers t)
+(minibuffer-depth-indicate-mode 1)
 
 ;; undo tree
 (when (rmg-try-require 'undo-tree)
