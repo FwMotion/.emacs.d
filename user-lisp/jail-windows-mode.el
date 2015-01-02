@@ -46,7 +46,8 @@ activates for the first time on a frame"
                       "^\\*js\\*$"
                       "^\\*info\\*$"
                       "^\\*local variables\\*$"
-                      "^\\*magit-diff")
+                      "^\\*magit-diff"
+                      "^COMMIT_EDITMSG$")
                 (completions "\\*Completions\\*$"
                              "^\\*Helm "
                              "^\\*Ido Completions\\*$"
@@ -89,12 +90,12 @@ activates for the first time on a frame"
     (modify-frame-parameters (or frame (selected-frame))
                              `((jail-windows-options . ,options)))))
 
-(defun jail-windows--prompt-for-layout (message
+(defun jail-windows--prompt-for-layout (prompt
                                         &optional predicate initial-input)
   "[Internal] Prompt the user for a layout."
   (let ((choices (list (-map #'car jail-windows--registered-layouts)))
         (choice))
-    (setq choice (completing-read message choices predicate t initial-input))
+    (setq choice (completing-read prompt choices predicate t initial-input))
     (if (equal choice "")
         (car (car choices))
       (intern choice))))
@@ -272,7 +273,6 @@ activates for the first time on a frame"
         (if (-contains? regexp-list buffer-name)
             ;; When it does match, only use windows from this group
             (progn
-              (message "Using windows: %s" window-list)
               (setq matched-group t)
               (setq available-windows window-list))
           ;; When it doesn't, remove this group's windows from the list
@@ -286,22 +286,19 @@ activates for the first time on a frame"
 
     ;; Pick among the remaining windows
     (when available-windows
-      ;; TODO: Look for an active one
-      (car available-windows))))
+      (let ((selected-window))
+        ;; TODO: Look for an active one
+        (setq selected-window (car available-windows))
+        (window--display-buffer buffer
+                                selected-window
+                                'reuse
+                                alist)))))
 
 (defadvice display-buffer (around jail-window-hook activate)
   "Handles jailing the window"
   (if (jail-windows/active-p)
-      (progn (let ((display-buffer-overriding-action
-                    '(jail-windows--display-buffer-override)))
-               ad-do-it))
-    (progn ad-do-it)))
-
-(defadvice display-buffer-other-frame (around jail-window-hook activate)
-  "Handles jailing the window"
-  (if (jail-windows/active-p)
       (let ((display-buffer-overriding-action
-                    '(jail-windows--display-buffer-override)))
+                    '((jail-windows--display-buffer-override))))
                ad-do-it)
     (progn ad-do-it)))
 
