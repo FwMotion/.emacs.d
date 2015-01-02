@@ -29,6 +29,8 @@ activates for the first time on a frame"
 ;; Layouts
 (defvar jail-windows--registered-layouts '())
 
+;; Code layout inspired by
+;; http://fullofsta.rs/2012/01/an-improved-emacs-window-setup/
 (defconst jail-windows--builtin-layouts-code
   '((group-defs (help "^\\*Apropos\\*$"
                       "^\\*Backtrace\\*$"

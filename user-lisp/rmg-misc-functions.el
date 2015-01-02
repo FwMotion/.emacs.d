@@ -39,4 +39,9 @@ upon context"
       (kill-buffer)
     (comint-delchar-or-maybe-eof arg)))
 
+(defun rmg/setup-windows-1 ()
+  "Shim to use new jail-windows-mode"
+  (interactive)
+  (jail-windows/activate-layout 'code t))
+
 (provide 'rmg-misc-functions)

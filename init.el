@@ -41,7 +41,6 @@
 ;; Run the rest of custom initialization
 (rmg-try-require 'rmg-files)
 (rmg-try-require 'rmg-startup)
-(rmg-try-require 'rmg-panels)
 (rmg-try-require 'rmg-generic-behavior)
 (rmg-try-require 'rmg-misc-functions)
 (rmg-try-require 'rmg-display-global)
