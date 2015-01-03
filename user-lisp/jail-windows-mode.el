@@ -200,7 +200,7 @@ activates for the first time on a frame"
                        (- requested-size (window-text-height old-window))
                        nil
                        t)
-        (select-window new-window t)))))
+        (select-window new-window 'norecord)))))
 
 (defun jail-windows--activate-handle-horz (option-alist)
   "[Internal]"
@@ -231,7 +231,7 @@ activates for the first time on a frame"
                        (- requested-size (window-body-width old-window))
                        t
                        t)
-        (select-window new-window t)))))
+        (select-window new-window 'norecord)))))
 
 (defun jail-windows--activate-handle-same (option-alist)
   "[Internal]"
@@ -242,7 +242,7 @@ activates for the first time on a frame"
   "[Internal]"
   (unless (< 1 (--count t windows-built))
     (pop windows-built)
-    (select-window (car windows-built) t)))
+    (select-window (car windows-built) 'norecord)))
 
 ;;;###autoload
 (defun jail-windows/activate-layout (layout-name &optional activate-mode)
@@ -256,14 +256,19 @@ activates for the first time on a frame"
   (jail-windows--set-option nil 'active-layout layout-name)
   (if (jail-windows/active-p)
       (let ((ignore-window-parameters t)
-            (prev-active-buffers (list (-map #'window-buffer
-                                             (window-list (selected-frame)
-                                                          'nominibuf))))
+            (prev-selected-buffer (window-buffer))
+            (prev-active-buffers
+             (-map #'window-buffer
+                   (window-list (selected-frame)
+                                'nominibuf
+                                (frame-first-window))))
             (layout-def (cdr (assq layout-name
                                    jail-windows--registered-layouts)))
             (window-groups)
-            (windows-built (list (frame-first-window))))
-        (select-window (car windows-built) t)
+            (windows-built (list (frame-first-window)))
+            (switch-to-window-preserve-window-point t))
+        (select-window (car windows-built) 'norecord)
+        (switch-to-buffer "*scratch*" 'norecord 'force-same-window)
         (delete-other-windows (car windows-built))
         (let-alist layout-def
           ;; Build the layout
@@ -286,9 +291,26 @@ activates for the first time on a frame"
                                                             window-groups)))
                                            .group-defs))
 
-          ;; TODO: restore buffers
+          ;; Try to show all buffers that were previously showing
+          (let ((selected-window)
+                (used-windows '()))
+            (--each prev-active-buffers
+              (setq selected-window
+                    (jail-windows--find-window-for-buffer nil
+                                                          it
+                                                          '()
+                                                          used-windows))
+              (when selected-window
+                (push selected-window used-windows)
+                (select-window selected-window 'norecord)
+                (switch-to-buffer it 'norecord 'force-same-window))))
 
-          (select-window (frame-first-window) t)))
+          ;; Try to select the previously selected buffer; otherwise select the
+          ;; first window in the frame
+          (select-window (or (get-buffer-window prev-selected-buffer
+                                                (selected-frame))
+                             (frame-first-window))
+                         'norecord)))
     (when activate-mode (jail-windows-mode 1))))
 
 ;;; Core functionality
@@ -307,9 +329,13 @@ used as `-compare-fn' in package `dash'."
       (setq ret (funcall buffer-matches-p buffer)))
     ret))
 
-(defun jail-windows--find-window-for-buffer (frame buffer alist)
+(defun jail-windows--find-window-for-buffer (frame buffer alist
+                                                   &optional skip-windows)
   "[Internal]"
-  (let ((available-windows (window-list frame 'nominibuf))
+  (unless frame
+    (setq frame (selected-frame)))
+  (let ((available-windows (-difference (window-list frame 'nominibuf)
+                                        skip-windows))
         (matched-group))
     ;; For each group defined in the jail-windows' window-options
     (--each-while (jail-windows--get-option frame 'groups)
@@ -317,7 +343,7 @@ used as `-compare-fn' in package `dash'."
         (not matched-group)
       ;; Pull the group definition and the window list from the group list
       (let ((group-defs (car it))
-            (window-list (-remove (-not #'window-live-p) (cdr it)))
+            (window-list (cdr it))
             (-compare-fn #'jail-windows--group-buffer-compare-fn))
         ;; Check if this group has live windows and matches against the buffer
         (if (and window-list
@@ -325,7 +351,9 @@ used as `-compare-fn' in package `dash'."
             ;; When it does match, only use windows from this group
             (progn
               (setq matched-group t)
-              (setq available-windows window-list))
+              (let ((-compare-fn nil))
+                (setq available-windows
+                      (-intersection available-windows window-list))))
           ;; When it doesn't, remove this group's windows from the list
           (let ((-compare-fn nil))
             (setq available-windows
@@ -334,7 +362,7 @@ used as `-compare-fn' in package `dash'."
     ;; Pick among the remaining windows
     (when available-windows
       (let ((selected-window))
-        ;; TODO: Look for an active one
+        ;; TODO(rgrimm): Look for an active one
         (setq selected-window (car available-windows))
 
         ;; Return the selected window
