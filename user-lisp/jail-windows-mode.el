@@ -1,3 +1,4 @@
+(require 'cl)
 (require 'dash)
 (require 'dash-functional)
 
@@ -17,6 +18,18 @@ the builtin layouts."
   "Default layout to activate when none has been selected and jail-windows-mode
 activates for the first time on a frame"
   :group 'jail-windows)
+(defcustom jail-windows-repeat-minimum-horz 45
+  ""
+  :type 'integer
+  :group 'jail-windows)
+(defconst jail-windows--real-repeat-minimum-horz 1
+  "")
+(defcustom jail-windows-repeat-minimum-vert 3
+  ""
+  :type 'integer
+  :group 'jail-windows)
+(defconst jail-windows--real-repeat-minimum-vert 1
+  "")
 
 ;; Hooks
 (defvar jail-windows-mode-hook '()
@@ -131,6 +144,21 @@ activates for the first time on a frame"
 
 ;;; Layout Activation
 
+(defun jail-windows--space-available-check (available-space
+                                            minimum-space
+                                            size
+                                            ratio)
+  "[Internal]"
+  (if size
+      (<= minimum-space
+          (- available-space
+             size))
+    (when ratio
+      (<= minimum-space
+          (* (/ available-space
+                ratio)
+             (- 1.0 ratio))))))
+
 (defun jail-windows--add-to-groups (window groups)
   "[Internal]"
   (when groups
@@ -156,9 +184,12 @@ activates for the first time on a frame"
                                            .ratio)))))
       (while (or first-run
                  (and .repeat
-                      .size
-                      (or .size)
-                      (>= (window-text-height) (1+ requested-size))))
+                      (jail-windows--space-available-check
+                       (window-text-height)
+                       (max jail-windows-repeat-minimum-vert
+                            jail-windows--real-repeat-minimum-vert)
+                       .size
+                       .ratio)))
         (setq first-run nil
               old-window (selected-window))
         (jail-windows--add-to-groups old-window .groups)
@@ -184,8 +215,12 @@ activates for the first time on a frame"
                                            .ratio)))))
       (while (or first-run
                  (and .repeat
-                      .size
-                      (>= (window-body-width) (1+ requested-size))))
+                      (jail-windows--space-available-check
+                       (window-body-width)
+                       (max jail-windows-repeat-minimum-horz
+                            jail-windows--real-repeat-minimum-horz)
+                       .size
+                       .ratio)))
         (setq first-run nil
               old-window (selected-window))
         (jail-windows--add-to-groups old-window .groups)
@@ -243,7 +278,7 @@ activates for the first time on a frame"
             (unless (eq (car windows-built) (selected-window))
               (push (selected-window) windows-built)))
 
-          ;; Set windows against regexps
+          ;; Set windows against group definitions
           (jail-windows--set-option nil
                                     'groups
                                     (--map (cons (cdr it)
@@ -258,21 +293,35 @@ activates for the first time on a frame"
 
 ;;; Core functionality
 
-(defun jail-windows--display-buffer-override (buffer alist)
-  "Take over window placement... ALIST is ignored"
-  (let ((buffer-name (buffer-name buffer))
-        (available-windows (window-list (selected-frame) 'nominibuf))
+(defun jail-windows--group-buffer-compare-fn (buffer buffer-matches-p)
+  "[Internal] Function to test buffer against group definition. This will be
+used as `-compare-fn' in package `dash'."
+  (let ((ret nil))
+    (when (eq t buffer-matches-p)
+      (setq ret t))
+    (when (and (not ret)
+               (stringp buffer-matches-p))
+      (setq ret (string-match-p buffer-matches-p (buffer-name buffer))))
+    (when (and (not ret)
+               (functionp buffer-matches-p))
+      (setq ret (funcall buffer-matches-p buffer)))
+    ret))
+
+(defun jail-windows--find-window-for-buffer (frame buffer alist)
+  "[Internal]"
+  (let ((available-windows (window-list frame 'nominibuf))
         (matched-group))
     ;; For each group defined in the jail-windows' window-options
-    (--each-while (jail-windows--get-option nil 'groups)
+    (--each-while (jail-windows--get-option frame 'groups)
         ;; Stop iterating when a group has matched
         (not matched-group)
-      ;; Pull the regexp list and the window list from the group
-      (let ((regexp-list (car it))
-            (window-list (cdr it))
-            (-compare-fn (-flip 'string-match-p)))
-        ;; Check if this list's regexp matches the BUFFER argument's name
-        (if (-contains? regexp-list buffer-name)
+      ;; Pull the group definition and the window list from the group list
+      (let ((group-defs (car it))
+            (window-list (-remove (-not #'window-live-p) (cdr it)))
+            (-compare-fn #'jail-windows--group-buffer-compare-fn))
+        ;; Check if this group has live windows and matches against the buffer
+        (if (and window-list
+                 (-contains? group-defs buffer))
             ;; When it does match, only use windows from this group
             (progn
               (setq matched-group t)
@@ -282,26 +331,32 @@ activates for the first time on a frame"
             (setq available-windows
                   (-difference available-windows window-list))))))
 
-    ;; Filter dead windows
-    (setq available-windows
-          (-remove (-not #'window-live-p) available-windows))
-
     ;; Pick among the remaining windows
     (when available-windows
       (let ((selected-window))
         ;; TODO: Look for an active one
         (setq selected-window (car available-windows))
-        (window--display-buffer buffer
-                                selected-window
-                                'reuse
-                                alist)))))
+
+        ;; Return the selected window
+        selected-window))))
+
+(defun jail-windows--display-buffer-override (buffer alist)
+  "[Internal] Take over window placement... ALIST is ignored"
+  (let ((selected-window (jail-windows--find-window-for-buffer (selected-frame)
+                                                               buffer
+                                                               alist)))
+    (when selected-window
+      (window--display-buffer buffer
+                              selected-window
+                              'reuse
+                              alist))))
 
 (defadvice display-buffer (around jail-window-hook activate)
   "Handles jailing the window"
   (if (jail-windows/active-p)
       (let ((display-buffer-overriding-action
-                    '((jail-windows--display-buffer-override))))
-               ad-do-it)
+             '((jail-windows--display-buffer-override))))
+        ad-do-it)
     (progn ad-do-it)))
 
 ;; TODO: (defadvice display-buffer-other-frame ...)?
