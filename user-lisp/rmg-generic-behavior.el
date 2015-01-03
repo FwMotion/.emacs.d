@@ -20,7 +20,7 @@
 (setq default-input-method 'chinese-py)
 
 ;; Mouse yank at point, not at mouse position
-(rmg-on-frames nil nil
+(rmg-on-frames t nil nil
                (when (display-mouse-p)
                  (setq mouse-yank-at-point t)))
 

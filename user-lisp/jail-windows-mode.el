@@ -52,6 +52,7 @@ activates for the first time on a frame"
                       "^\\*ediff.*\\*$"
                       "^\\*e?shell"
                       "^\\*Help\\*$"
+                      "^\\*hgrep\\*$"
                       "^\\*info\\*$"
                       "^\\*js\\*$"
                       "^\\*local variables\\*$"
@@ -64,7 +65,8 @@ activates for the first time on a frame"
                 (completions "Completions\\*$"
                              "^\\*elisp macroexpansion\\*$"
                              "^\\*helm "
-                             "^\\*magit"))
+                             "^\\*magit"
+                             "^\\*vc-dir\\*$"))
     (window-layout (| (size . 80)
                       (repeat . t))
                    (- (ratio . 0.66)

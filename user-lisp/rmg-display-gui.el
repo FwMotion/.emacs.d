@@ -1,12 +1,10 @@
 (when (fboundp 'hl-line-toggle-when-idle)
   (hl-line-when-idle-interval 2)
-  (rmg-on-frames nil t
-                 (if (display-graphic-p)
-                     (hl-line-toggle-when-idle 1 nil)
-                   (hl-line-toggle-when-idle -1 nil))))
+  (rmg-on-frames t nil nil
+                 (hl-line-toggle-when-idle 1 nil)))
 
 ;; Set up frames
-(rmg-on-frames nil nil
+(rmg-on-frames t nil nil
                ;; Title format
                (setq frame-title-format (concat "%b - "
                                                 (downcase user-login-name)
@@ -30,13 +28,20 @@
   :group 'rmg
   :set (lambda (_var val)
          (set-default _var val)
+
          ;; For some reason, this causes Emacs to flash a bunch and then crash
-         (load-theme val t)
+         ;;(load-theme val t)
          ))
 (when (load-theme rmg-preferred-theme-gui t t)
-  (rmg-on-frames t nil
-                 (when (display-graphic-p)
-                   (enable-theme rmg-preferred-theme-gui))))
+  (rmg-on-frames t nil nil
+                 (enable-theme rmg-preferred-theme-gui)
+                 (unless (or (display-graphic-p)
+                             (display-multi-font-p))
+                   (disable-theme rmg-preferred-theme-gui)))
+  (rmg-on-frames nil t t
+                 (if (and (display-graphic-p) (display-color-p))
+                     (enable-theme rmg-preferred-theme-gui)
+                   (disable-theme rmg-preferred-theme-gui))))
 
 (defcustom rmg-preferred-font-height 90
   "Preferred font height in GUI frames. Unit is tenths of a point. For
@@ -51,8 +56,8 @@ screens (17inch at 1920x1200) will typically be 110 for 11pt."
          (set-face-attribute 'default
                              nil
                              :height val)))
-(rmg-on-frames nil nil
-               (when (display-graphic-p)
+(rmg-on-frames t t nil
+               (when (display-multi-font-p)
                  (set-face-attribute 'default nil
                                      :height rmg-preferred-font-height)))
 
@@ -96,13 +101,13 @@ screens (17inch at 1920x1200) will typically be 110 for 11pt."
   "Auto maximize the frame when starting"
   :type 'boolean
   :group 'rmg)
-(rmg-on-frames nil nil
+(rmg-on-frames t nil nil
                (when (and (display-graphic-p)
                           rmg-maximize-on-setup)
                  (rmg/maximize-frame)))
 
 ;; Move mouse away from point
-(rmg-on-frames nil nil
+(rmg-on-frames t t nil
                (when (display-mouse-p)
                  (mouse-avoidance-mode 'exile)))
 

@@ -1,14 +1,15 @@
-(defmacro rmg-on-frames (new-frames focus-in &rest body)
+(defmacro rmg-on-frames (window-setup new-frames focus-in &rest body)
   "Add hook to run after initialization completes and frame parameters have
 been set up. If NEW-FRAMES is non-nil, it will also add a hook to run for all
 new frames. Additionally, if FOCUS-IN is non-nil, add a hook to run when focus
 changes.
 
-\(fn NEW-FRAMES FOCUS-IN &rest BODY)"
+\(fn WINDOW-SETUP NEW-FRAMES FOCUS-IN &rest BODY)"
   `(progn
-     (add-hook 'window-setup-hook
-               (lambda () ,@body)
-               t)
+     (when ,window-setup
+       (add-hook 'window-setup-hook
+                 (lambda () ,@body)
+                 t))
      (when ,new-frames
        (add-hook 'after-make-frame-functions
                  (lambda (rmg-on-frame-frame)

@@ -8,6 +8,6 @@
   (put 'inhibit-startup-echo-area-message
        'saved-value (list (user-login-name))))
 
-(rmg-on-startup (server-start))
+(server-start)
 
 (provide 'rmg-startup)

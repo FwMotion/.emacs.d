@@ -34,7 +34,7 @@
                 'save-buffers-kill-emacs)
 
 ;; Reset cursor types
-(rmg-on-frames nil nil
+(rmg-on-frames t nil nil
                (setq cursor-type t
                      cursor-in-non-selected-windows t))
 
