@@ -103,7 +103,9 @@
 (defcustom rmg-auto-update-whitespace t
   "When non-nil, automatically update whitespace (indent and trailing spaces)
 when saving files."
-  :type 'boolean
+  :type '(choice (const :tag "Always" t)
+                 (const :tag "Never" nil)
+                 (other :tag "Ask" prompt))
   :group 'rmg)
 
 (defun rmg/update-whitespace (&optional start end)
@@ -120,9 +122,11 @@ when saving files."
 
 (add-hook 'before-save-hook
           (lambda ()
-            (when (or rmg-auto-update-whitespace
-                      (yes-or-no-p
-                       "Update indent and remove trailing whitespace? "))
-              (rmg/update-whitespace))))
+            (unless (or (not (get-buffer-window (current-buffer)))
+                        (eq 'nil rmg-auto-update-whitespace))
+              (when (or (eq 't rmg-auto-update-whitespace)
+                        (yes-or-no-p
+                         "Update indent and remove trailing whitespace? "))
+                (rmg/update-whitespace)))))
 
 (provide 'rmg-files)

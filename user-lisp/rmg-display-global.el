@@ -35,7 +35,7 @@
   (setq uniquify-buffer-name-style 'post-forward-angle-brackets))
 
 ;; Display search counts
-(global-anzu-mode +1)
+(global-anzu-mode 1)
 
 ;; I love the code comments of diminish; yet I had to replace with delight
 (when (rmg-try-require 'delight)
