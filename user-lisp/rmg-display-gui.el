@@ -22,27 +22,6 @@
                ;; Fringe only on the right
                (set-fringe-mode '(0 . 8)))
 
-(defcustom rmg-preferred-theme-gui 'twilight-anti-bright
-  "Preferred GUI theme"
-  :type 'symbol
-  :group 'rmg
-  :set (lambda (_var val)
-         (set-default _var val)
-
-         ;; For some reason, this causes Emacs to flash a bunch and then crash
-         ;;(load-theme val t)
-         ))
-(when (load-theme rmg-preferred-theme-gui t t)
-  (rmg-on-frames t nil nil
-                 (enable-theme rmg-preferred-theme-gui)
-                 (unless (or (display-graphic-p)
-                             (display-multi-font-p))
-                   (disable-theme rmg-preferred-theme-gui)))
-  (rmg-on-frames nil t t
-                 (if (and (display-graphic-p) (display-color-p))
-                     (enable-theme rmg-preferred-theme-gui)
-                   (disable-theme rmg-preferred-theme-gui))))
-
 (defcustom rmg-preferred-font-height 90
   "Preferred font height in GUI frames. Unit is tenths of a point. For
 example, standard screen DPIs will typically use 90 for 9pt font; higher DPI

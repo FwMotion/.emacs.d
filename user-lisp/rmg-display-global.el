@@ -45,4 +45,8 @@
              (magit-auto-revert-mode nil "magit")
              (undo-tree-mode nil "undo-tree"))))
 
+;; Set theme -- moe-dark looks very nice on 256terms and in GUI
+(when (rmg-try-require 'moe-theme)
+  (moe-dark))
+
 (provide 'rmg-display-global)
