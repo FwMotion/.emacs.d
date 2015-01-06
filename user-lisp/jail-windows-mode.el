@@ -1,4 +1,23 @@
-(require 'cl)
+;;; jail-windows-mode.el --- Attempt to bring sanity to Emacs windows
+
+;; Jail windows
+;; Copyright (C) 2014 Robert Grimm
+;;
+;; Author: Robert Grimm <grimm dot rob at gmail dot com>
+;; Maintainer: Robert Grimm <grimm dot rob at gmail dot com>
+;; Keywords: windows, display-buffer
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;; Jail-windows is a mode for attempting to maintain a consistent window layout
+;; while working within Emacs. This does not directly prevent creation of new
+;; windows or deletion of existing windows; instead, it attempts
+;;
+;;; Code:
+
+(eval-when-compile (require 'cl-lib))
 (require 'dash)
 (require 'dash-functional)
 
@@ -19,7 +38,7 @@ the builtin layouts."
                (jail-windows/register-builtin-layouts)
              (jail-windows/unregister-builtin-layouts))))
   :group 'jail-windows)
-(defcustom jail-windows-default-layout nil
+(defcustom jail-windows-default-layout 'code
   "Default layout to activate when none has been selected and jail-windows-mode
 activates for the first time on a frame."
   :group 'jail-windows)
@@ -46,11 +65,11 @@ were previously shown."
 Functions should use a signature of (fn FRAME WINDOW-GROUP AVAILABLE-WINDOWS
 BUFFER ALIST); where the arguments are:
 
- `FRAME' -- the frame from which the AVAILABLE-WINDOWS have been chosen,
- `WINDOW-GROUP' -- the layout group which matched for the BUFFER,
- `AVAILABLE-WINDOWS' -- a list of windows preselected by jail-windows-mode,
- `BUFFER' -- the buffer that will be displayed, and
- `ALIST' -- as described by `display-buffer'.
+ FRAME -- the frame from which the AVAILABLE-WINDOWS have been chosen,
+ WINDOW-GROUP -- the layout group which matched for the BUFFER,
+ AVAILABLE-WINDOWS -- a list of windows preselected by jail-windows-mode,
+ BUFFER -- the buffer that will be displayed, and
+ ALIST -- as described by `display-buffer'.
 
 Each function should return either a window or nil. Note that a returned window
 needn't be one from AVAILABLE-WINDOWS.
@@ -111,8 +130,9 @@ perform the actual buffer-switching behavior."
                       "^COMMIT_EDITMSG$")
                 (completions "Completions\\*$"
                              "^\\*elisp macroexpansion\\*$"
-                             "^\\*helm "
+                             "^\\*helm\\(-\\| \\)"
                              "^\\*magit"
+                             "^\\*Process List\\*$"
                              "^\\*vc-dir\\*$"))
     (window-layout (| (size . 80)
                       (repeat . t))
@@ -156,7 +176,7 @@ perform the actual buffer-switching behavior."
   (let* ((choices (list (-map #'car jail-windows--registered-layouts)))
          (choice (completing-read prompt choices predicate t initial-input)))
     (if (equal choice "")
-        (car (car choices))
+        (caar choices)
       (intern choice))))
 
 (defun jail-windows--message (type &rest args)
@@ -356,7 +376,7 @@ window."
                                             (selected-frame))
                          (frame-first-window))
                      'norecord)))
-  (jail-windows--set-option nil 'last-layout-active t))
+  (jail-windows--update-modeline t))
 
 ;;;###autoload
 (defun jail-windows/activate-layout (layout-name &optional activate-mode)
@@ -407,6 +427,23 @@ Returns one of the following symbols:
               'extra
             t))))))
 
+(defun jail-windows--update-modeline (&optional layout-active-p)
+  "[Internal] Set the modeline display text based on active state."
+  (setq jail-windows-mode
+        (when (and (jail-windows--frame-active-p)
+                   (if layout-active-p
+                       layout-active-p
+                     (setq layout-active-p (jail-windows--layout-active-p))))
+          (prog1
+              (concat jail-windows--modeline-base
+                      (cl-case layout-active-p
+                        (extra "+")
+                        (t "=")
+                        (partial "-")))
+            (jail-windows--set-option nil
+                                      'last-layout-active
+                                      layout-active-p)))))
+
 (defun jail-windows--window-config-change-hook-fun ()
   "[Internal] Hook function for `window-configuration-change-hook' to determine
 and log whether a window configuration change has "
@@ -420,7 +457,7 @@ and log whether a window configuration change has "
                                "Jailed window configuration changed! %s --> %s"
                                last-active-p
                                layout-active-p)
-        (jail-windows--set-option nil 'last-layout-active layout-active-p)))))
+        (jail-windows--update-modeline layout-active-p)))))
 
 ;; TODO(rgrimm): Advise set-window-configuration to rebuild groups after it has
 ;; been called
@@ -701,6 +738,14 @@ parameters."
 active."
   (modify-frame-parameters nil (list (cons 'jail-windows-mode state))))
 
+(defvar jail-windows--modeline-base " JW"
+  "[Internal] Base of modeline text.")
+(defvar jail-windows-mode nil
+  "Indicator variable for variable `minor-mode-alist'.")
+
+(push '(jail-windows-mode jail-windows-mode)
+      minor-mode-alist)
+
 ;;;###autoload
 (define-minor-mode jail-windows-mode
   "Jail the windows to a set layout."
@@ -722,7 +767,7 @@ active."
      (or (jail-windows--get-option nil
                                    'active-layout)
          (jail-windows/layout-p jail-windows-default-layout)
-         (car (car jail-windows--registered-layouts)))))
+         (caar jail-windows--registered-layouts))))
   (run-hooks (when (jail-windows/active-p)
                'jail-windows-mode-in-hook)
              'jail-windows-mode-hook
