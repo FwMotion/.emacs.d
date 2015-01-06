@@ -33,7 +33,8 @@
       ido-enable-flex-matching t
       ido-enable-regexp t
       ido-ignore-extensions t
-      ;; Bug with ido and magit for .emacs.d, so dot prefix has to be nil for now
+      ;; Bug with ido and magit for .emacs.d, so dot prefix has to be nil for
+      ;; now
       ido-enable-dot-prefix nil)
 (add-to-list 'ido-ignore-directories
              "^\\.$"
@@ -43,15 +44,11 @@
 (rmg-on-startup (when (rmg-try-require 'ido-ubiquitous)
                   (ido-ubiquitous-mode 1)))
 
-;; Smart M-x for M-X major mode
-(when (rmg-try-require 'smex)
-  (smex-initialize))
-
 ;; helm for M-x
 (when (rmg-try-require 'helm-config)
   ;; Just to be sure; I prefer ido style for most things, actually...
   ;; maybe not.
-  (helm-mode -1)
+  (helm-mode 1)
 
   ;; Other settings
   (setq ;helm-prevent-escaping-from-minibuffer nil

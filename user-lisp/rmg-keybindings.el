@@ -49,22 +49,42 @@
                   (join-line -1)))
 
 ;; Set input method (clear C-x C-m for alternate M-x)
-(global-set-key (kbd "C-M-\\") 'set-input-method)
+(global-set-key (kbd "C-M-\\") #'set-input-method)
 
 ;; Webjump
-(global-set-key (kbd "C-x g") 'webjump)
-(global-set-key (kbd "C-x M-g") 'browse-url-at-point)
+(global-set-key (kbd "C-x g") #'webjump)
+(global-set-key (kbd "C-x M-g") #'browse-url-at-point)
+
+;; Use helm for M-x
+;; Use Steve Yegge's advice to use C-x C-m
+(global-set-key (kbd "C-x C-m") #'helm-M-x)
+;; C-m gets interpreted as RET
+(global-set-key (kbd "C-x RET") #'helm-M-x)
+(global-set-key (kbd "M-x") #'helm-M-x)
+;; Store original extended command
+(global-set-key (kbd "C-c C-c M-x") #'execute-extended-command)
+
+;; Smex is autoloaded
+(when (fboundp #'smex-major-mode-commands)
+  (global-set-key (kbd "M-X") #'smex-major-mode-commands))
+
+;; Help commands
+(global-set-key (kbd "C-h a") #'helm-apropos)
+
+;; Buffer switching
+(global-set-key (kbd "C-x b") #'helm-mini)
+(global-set-key (kbd "C-x C-b") #'helm-buffers-list)
+
+;; Find files
+(global-set-key (kbd "C-x C-f") #'helm-find-files)
 
 ;; Make ido-mode lines a little more sane
 (add-hook 'ido-setup-hook
           (lambda ()
-            (define-key ido-completion-map (kbd "C-o") nil)
-            (define-key ido-completion-map (kbd "M-o") nil)
+            ;;(define-key ido-completion-map (kbd "C-o") nil)
+            ;;(define-key ido-completion-map (kbd "M-o") nil)
             (define-key ido-completion-map (kbd "C-n") 'ido-next-match)
             (define-key ido-completion-map (kbd "C-p") 'ido-prev-match)))
-
-;; Make helm also a bit more sane
-(define-key helm-map (kbd "C-o") 'nil)
 
 ;;; Conditional Keybindings
 ;; Find file in project
@@ -101,28 +121,6 @@
   (global-set-key (kbd "C-x C-a") 'org-agenda))
 (when (fboundp 'org-store-link)
   (global-set-key (kbd "C-c l") 'org-store-link))
-
-;; M-x
-(when (fboundp 'helm-M-x)
-  ;; Use Steve Yegge's advice to use C-x C-m
-  (global-set-key (kbd "C-x C-m") #'helm-M-x)
-  ;; C-m gets interpreted as RET
-  (global-set-key (kbd "C-x RET") #'helm-M-x)
-  (global-set-key (kbd "M-x") #'helm-M-x)
-  ;; Store original extended command
-  (global-set-key (kbd "C-c C-c M-x") #'execute-extended-command))
-(when (fboundp 'smex-major-mode-commands)
-  (global-set-key (kbd "M-X") #'smex-major-mode-commands))
-
-;; Help commands
-(when (fboundp 'helm-apropos)
-  (global-set-key (kbd "C-h a") #'helm-apropos))
-
-;; Buffer switching
-(when (fboundp 'helm-mini)
-  (global-set-key (kbd "C-x b") #'helm-mini))
-(when (fboundp 'helm-buffers-list)
-  (global-set-key (kbd "C-x C-b") #'helm-buffers-list))
 
 ;; Use <select> as a keybinding for end-of-line (end key over SSH)
 (unless (display-graphic-p)

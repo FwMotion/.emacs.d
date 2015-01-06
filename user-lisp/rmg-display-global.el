@@ -42,6 +42,7 @@
   (delight '((anzu-mode nil "anzu")
              (global-whitespace-mode nil "whitespace")
              (guide-key-mode nil "guide-key")
+             (helm-mode nil "helm-mode")
              (magit-auto-revert-mode nil "magit")
              (undo-tree-mode nil "undo-tree"))))
 
