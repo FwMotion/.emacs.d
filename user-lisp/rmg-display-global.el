@@ -46,6 +46,9 @@
              (undo-tree-mode nil "undo-tree"))))
 
 ;; Set theme -- moe-dark looks very nice on 256terms and in GUI
+(when (and (rmg-try-require 'powerline)
+           (rmg-try-require 'moe-theme))
+  (powerline-moe-theme))
 (when (rmg-try-require 'moe-theme)
   (moe-dark))
 
