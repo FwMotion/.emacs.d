@@ -133,7 +133,8 @@ perform the actual buffer-switching behavior."
                              "^\\*helm\\(-\\| \\)"
                              "^\\*magit"
                              "^\\*Process List\\*$"
-                             "^\\*vc-dir\\*$"))
+                             "^\\*vc-dir\\*$"
+                             "^ widget-choose$"))
     (window-layout (| (size . 80)
                       (repeat . t))
                    (- (ratio . 0.66)
