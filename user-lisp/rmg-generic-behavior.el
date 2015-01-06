@@ -40,9 +40,10 @@
              "^\\.$"
              "^node_modules$")
 
-;; ido ubiquitous
-(rmg-on-startup (when (rmg-try-require 'ido-ubiquitous)
-                  (ido-ubiquitous-mode 1)))
+;; Semantic mode in programming modes
+(add-hook 'prog-mode
+          (lambda ()
+            (semantic-mode 1)))
 
 ;; helm for M-x
 (when (rmg-try-require 'helm-config)

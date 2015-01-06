@@ -40,7 +40,8 @@
 (global-set-key [remap goto-line] 'rmg/goto-line-with-feedback)
 
 ;; Editing
-(global-set-key (kbd "C-w") 'rmg/kill-region-or-previous-word)
+(global-set-key (kbd "C-w") #'rmg/kill-region-or-previous-word)
+(global-set-key (kbd "M-y") #'helm-show-kill-ring)
 
 ;; Join lines
 (global-set-key (kbd "M-j")

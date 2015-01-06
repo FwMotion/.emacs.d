@@ -2,13 +2,23 @@
   (concat rmg:user-emacs-dir "state/")
   "Location to contain all files holding \"current state\" of emacs.")
 (make-directory rmg:state-directory t)
+(rmg-on-startup (add-hook 'kill-emacs-hook
+                          (lambda ()
+                            (ignore-errors
+                              (make-directory rmg:state-directory t)))))
 
-;; Default coding
-(set-language-environment 'utf-8)
-(prefer-coding-system 'utf-8)
-(set-keyboard-coding-system 'utf-8)
-(setq locale-coding-system 'utf-8)
-(set-selection-coding-system 'utf-8)
+;; Default coding (prefer-utf-8 if available; otherwise, utf-8)
+(defvar rmg:preferred-coding-system (or (ignore-errors
+                                          (coding-system-base 'prefer-utf-8))
+                                        'utf-8))
+;; Default to DOS-style line ends; this is most portable to other programs
+(set-language-environment rmg:preferred-coding-system)
+(setq rmg:preferred-coding-system
+      (coding-system-change-eol-conversion rmg:preferred-coding-system 'dos))
+(set-default-coding-systems rmg:preferred-coding-system)
+(set-selection-coding-system rmg:preferred-coding-system)
+(prefer-coding-system rmg:preferred-coding-system)
+(setq locale-coding-system rmg:preferred-coding-system)
 
 ;; Backup
 (make-directory (concat rmg:user-emacs-dir "backup/") t)
@@ -38,9 +48,9 @@
 (setq tetris-score-file (concat rmg:state-directory "tetris-scores"))
 
 ;; Save pointer location
-(require 'saveplace)
-(setq-default save-place t)
-(setq save-place-file (concat rmg:state-directory "places"))
+(when (rmg-try-require 'saveplace)
+  (setq-default save-place t)
+  (setq save-place-file (concat rmg:state-directory "places")))
 
 ;; Abbreviations
 (setq abbrev-file-name (concat rmg:state-directory "abbrev_defs"))
@@ -50,7 +60,6 @@
       revive:desktop-base-file-name "SessionDesktop.el")
 
 ;; Eshell
-(require 'eshell)
 (setq eshell-directory-name (concat rmg:user-emacs-dir "eshell/"))
 (setq eshell-login-script (concat eshell-directory-name "login")
       eshell-rc-script (concat eshell-directory-name "profile"))
@@ -92,8 +101,10 @@
 (setq helm-documentation-file (concat rmg:state-directory "helm-doc.org")
       helm-adaptive-history-file (concat rmg:state-directory "helm-history"))
 
-;; Recentf file
-(setq recentf-save-file (concat rmg:state-directory "recentf"))
+;; Recentf
+(setq recentf-save-file (concat rmg:state-directory "recentf")
+      recentf-max-saved-items 40
+      recentf-max-menu-items recentf-max-saved-items)
 
 ;; Org-mode stuff
 (setq org-clock-persist-file (concat rmg:state-directory "org-clock-save.el")
