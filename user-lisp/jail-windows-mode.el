@@ -606,8 +606,8 @@ options specified within ALIST."
                        (window-body-width it)))
                ;; TODO(rgrimm): Floating point versions of window-height and
                ;; window-width.
-               ))
-        (setq selected-window it)
+               )
+          (setq selected-window it))
         ;; TODO(rgrimm): Run function versions of window-height and
         ;; window-width against the selected window?
         )
