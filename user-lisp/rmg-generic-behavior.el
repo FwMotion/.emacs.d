@@ -27,19 +27,6 @@
 ;; Don't make sounds
 (setq visible-bell t)
 
-;; ido
-(ido-mode 1)
-(setq ido-auto-merge-work-directories-length -1
-      ido-enable-flex-matching t
-      ido-enable-regexp t
-      ido-ignore-extensions t
-      ;; Bug with ido and magit for .emacs.d, so dot prefix has to be nil for
-      ;; now
-      ido-enable-dot-prefix nil)
-(add-to-list 'ido-ignore-directories
-             "^\\.$"
-             "^node_modules$")
-
 ;; Semantic mode in programming modes
 (add-hook 'prog-mode
           (lambda ()
