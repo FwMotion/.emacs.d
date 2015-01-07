@@ -12,6 +12,11 @@
         ns-right-alternate-modifier 'left))
 
 ;;; Global keybindings
+;; Maximize window
+(when (and running-on-linux
+           (display-multi-frame-p))
+  (global-set-key (kbd "<f11>") #'rmg/toggle-maximize-frame))
+
 ;; Preferred window layout
 (global-set-key (kbd "C-x C-1") 'rmg/setup-windows-1)
 (global-set-key (kbd "C-x C-!") 'rmg/setup-windows-1)
@@ -147,7 +152,9 @@
 (add-hook 'shell-mode-hook
           (lambda ()
             (define-key shell-mode-map
-              (kbd "C-d") 'rmg/comint-delchar-or-eof-or-kill-buffer)))
+              (kbd "C-d") #'rmg/comint-delchar-or-eof-or-kill-buffer)
+            (define-key shell-mode-map
+              (kbd "C-c C-l") #'helm-comint-input-ring)))
 
 ;; Eshell
 (add-hook 'eshell-mode-hook
