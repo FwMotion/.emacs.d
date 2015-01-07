@@ -1,7 +1,7 @@
-;;; jail-windows-mode.el --- Attempt to bring sanity to Emacs windows
+;;; jail-windows-mode.el --- Rehabilitation for Emacs windows
 
 ;; Jail windows
-;; Copyright (C) 2014 Robert Grimm
+;; Copyright (C) 2014-2015 Robert Grimm
 ;;
 ;; Author: Robert Grimm <grimm dot rob at gmail dot com>
 ;; Maintainer: Robert Grimm <grimm dot rob at gmail dot com>
@@ -13,7 +13,23 @@
 ;;
 ;; Jail-windows is a mode for attempting to maintain a consistent window layout
 ;; while working within Emacs. This does not directly prevent creation of new
-;; windows or deletion of existing windows; instead, it attempts
+;; windows or deletion of existing windows; instead, it offers a framework for
+;; defining layout and window selection rules.
+;;
+;; This minor mode is designed to operate on a frame level; in other words,
+;; jailing of one frame's windows should not affect the operation of windows
+;; within other frames.
+;;
+;; Usage
+;; -----------------
+;; (require 'jail-windows-mode) ; unless it is autoloaded
+;; (global-set-key (kbd "C-x C-1") #'jail-windows/activate-layout)
+;; (global-set-key (kbd "C-x C-2") (lambda ()
+;;                                   (interactive)
+;;                                   (jail-windows/activate-layout 'code)))
+;;
+;; For more advanced usage information, please consult the customization
+;; options and the function `jail-windows/register-layout'.
 ;;
 ;;; Code:
 
@@ -25,7 +41,10 @@
 ;;; Customization
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defgroup jail-windows nil
-  "TODO"
+  "Jail-windows is a mode for attempting to maintain a consistent window layout
+while working within Emacs. This does not directly prevent creation of new
+windows or deletion of existing windows; instead, it offers a framework for
+defining layout and window selection rules."
   :group 'windows)
 (defcustom jail-windows-register-builtin-layouts t
   "Flag to determine whether jail-windows-mode should automatically register
@@ -47,12 +66,19 @@ activates for the first time on a frame."
 were previously shown."
   :type 'string
   :group 'jail-windows)
+(defcustom jail-windows-deactivate-on-delete-others t
+  "Flag to indicate whether jail-windows-mode should automatically deactive
+when function `delete-other-windows' is called interactively."
+  :type 'boolean
+  :group 'jail-windows)
 (defcustom jail-windows-repeat-minimum-horz 45
-  "TODO"
+  "The minimum number of characters that would be left after a horizontal split
+before `jail-windows/activate-layout' will allow a repeated horizontal split."
   :type 'integer
   :group 'jail-windows)
 (defcustom jail-windows-repeat-minimum-vert 3
-  "TODO"
+  "The minimum number of lines that would be left after a vertical split before
+`jail-windows/activate-layout' will allow a repeated vertical split."
   :type 'integer
   :group 'jail-windows)
 (defcustom jail-windows-choose-window-actions
@@ -79,11 +105,12 @@ perform the actual buffer-switching behavior."
   :type '(repeat function)
   :group 'jail-windows)
 (defcustom jail-windows-debug-messages '(on-off)
-  "TODO"
-  :type '(set (const :tag "on-off TODO" on-off)
-              (const :tag "layout TODO" layout)
-              (const :tag "selection TODO" selection)
-              (const :tag "selection verbose TODO" selection-verbose))
+  "Flags to indicate verbosity of jail-windows-mode functions."
+  :type '(set (const :tag "on-off toggle messages" on-off)
+              (const :tag "layout activation messages" layout)
+              (const :tag "window selection messages" selection)
+              (const :tag "additional window selection messages"
+                     selection-verbose))
   :group 'jail-windows)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -91,25 +118,52 @@ perform the actual buffer-switching behavior."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defconst jail-windows--real-repeat-minimum-horz 1
-  "TODO")
+  "[Internal] The minimum allowed value for `jail-windows-repeat-minimum-horz'.
+Values below this number will be ignored.")
 (defconst jail-windows--real-repeat-minimum-vert 1
-  "TODO")
+  "[Internal] The minimum allowed value for `jail-windows-repeat-minimum-vert'.
+Values below this number will be ignored.")
 
 ;; Hooks
 (defvar jail-windows-mode-hook '()
-  "Hooks to run when the jail-windows-mode is enabled or disabled.")
+  "Hooks to run when the jail-windows-mode is enabled or disabled.
+
+These hooks will run after `jail-windows-mode-in-hook' when jail-windows-mode
+activates, and before `jail-windows-mode-out-hook' when the mode deactivates.")
 (defvar jail-windows-mode-in-hook '()
-  "Hooks to run when the jail-windows-mode is enabled.")
+  "Hooks to run when the jail-windows-mode is enabled.
+
+These hooks will run before `jail-windows-mode-hook' when jail-windows-mode
+activates. They will not run when jail-windows-mode deactivates.
+
+See also `jail-windows/register-layout' for defining hooks specific to
+individual layouts.")
 (defvar jail-windows-mode-out-hook '()
-  "Hooks to run when the jail-windows-mode is disabled.")
+  "Hooks to run when the jail-windows-mode is disabled.
+
+These hooks will run after `jail-windows-mode-hook' when jail-windows-mode
+deactivates. They will not run when the mode activates.")
 
 ;; Layouts
-(defvar jail-windows--registered-layouts '())
+(defvar jail-windows--registered-layouts '()
+  "[Internal] Alist of layouts that have been registered through
+`jail-windows/register-layout'. The car for each element is the symbol
+specified as layout name, and the cdr of each is the layout definition.")
 
-;; Code layout inspired by
-;; http://fullofsta.rs/2012/01/an-improved-emacs-window-setup/
-(defconst jail-windows--builtin-layouts-code
-  '((group-defs (help "^\\*Apropos\\*$"
+(defconst jail-windows--builtin-layouts-list '(code cross)
+  "[Internal] List of builtin layouts by symbol name")
+
+(defconst jail-windows--builtin-layouts:code
+  '((description . "Inspired by
+http://fullofsta.rs/2012/01/an-improved-emacs-window-setup/
+
+This layout features 80-column windows on the left and middle, with two
+auxilliary windows to the right. The top right window will show reference
+information buffers (eg help, info, grep) as well as compilation output, source
+diffs, and comint buffers. The bottom right window is intended to show
+completion options and source control overview buffers (eg, vc-dir or magit
+status).")
+    (group-defs (help "^\\*Apropos\\*$"
                       "^\\*Backtrace\\*$"
                       "^\\*Colors\\*$"
                       "^\\*Compile-Log\\*$"
@@ -123,7 +177,6 @@ perform the actual buffer-switching behavior."
                       "^\\*local variables\\*$"
                       "^\\*Locate\\*$"
                       "^\\*magit-\\(diff\\|commit\\)"
-                      "^\\*Man "
                       "^\\*Occur\\*$"
                       "^\\*Pp Eval Output\\*$"
                       "^\\*\\(Wo\\)?Man"
@@ -140,6 +193,15 @@ perform the actual buffer-switching behavior."
                    (- (ratio . 0.66)
                       (groups . (help)))
                    (* (groups . (completions))))))
+
+(defconst jail-windows--builtin-layouts:cross
+  '((description . "A simple cross, to divide the frame evenly into four
+windows. No groups are defined, so all windows are available for all buffers")
+    (window-layout (-)
+                   (|)
+                   (^)
+                   (^)
+                   (|))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Foundation
@@ -174,10 +236,13 @@ perform the actual buffer-switching behavior."
 (defun jail-windows--prompt-for-layout (prompt
                                         &optional predicate initial-input)
   "[Internal] Prompt the user for a layout."
-  (let* ((choices (list (-map #'car jail-windows--registered-layouts)))
-         (choice (completing-read prompt choices predicate t initial-input)))
+  (let ((choice (completing-read prompt
+                                 jail-windows--registered-layouts
+                                 predicate
+                                 t
+                                 initial-input)))
     (if (equal choice "")
-        (caar choices)
+        (caar jail-windows--registered-layouts)
       (intern choice))))
 
 (defun jail-windows--message (type &rest args)
@@ -190,15 +255,66 @@ perform the actual buffer-switching behavior."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun jail-windows/register-layout (layout-name layout-def)
-  "Register a new layout
+  "Register a new jail-windows layout
 
-TODO: Describe layout
+LAYOUT-NAME should be a symbol to briefly describe the layout.
 
-Remember that 'unassigned is a special group name and can't be directly
-assigned."
-  (jail-windows/unregister-layout layout-name)
-  (push (cons layout-name layout-def)
-        jail-windows--registered-layouts))
+LAYOUT-DEF should be an alist containing elements with the following cells:
+
+ (description . \"...\")
+     A human-readable description of the layout, its purpose, inspiration, or
+     any other relevant information. This cons cell is not used by the code.
+
+ (group-defs (group1 (\"...\"
+                      (lambda () ...)
+                      t)))
+     An alist of group names to lists of group matchers. Group matchers can be
+     one of several types: strings are treated as regexps that will test
+     against buffer names; functions are treated as predicates to test against
+     the buffer object; the symbol t matches all buffers.
+
+     Group defs will be evaluated in the order that they are specified in the
+     layout definition. In other words, when multiple groups contain a matcher
+     that would return t, the top group will be assigned the window.
+
+     Note that group-defs may include an element with car of symbol unassigned.
+     This is a special group reserved for windows that were not explicitly
+     assigned to any other group in the window-layout (as described below.)
+     This 'unassigned group may not have any windows explicitly assigned to it.
+
+ (window-layout (- (size . 5)
+                   (repeat . t))
+                (| (ratio . 0.5))
+                (* (groups . (a b c)))
+                (^))
+     A list describing the desired layout of windows within the frame. Each
+     item of the list is a cons cell with car describing the type of layout
+     action, and cdr as an alist of options for the specified action.
+
+     The actions are performed sequentially when the layout is built. The
+     actions available are as follows:
+
+       symbol `-' -- Split the window vertically down
+       symbol `|' -- Split the window horizontally to the right
+       symbol `*' -- Set options on the current window
+       symbol `^' -- Refer to the window created by previous action
+
+     Note that options specified for each split will be set on the source of
+     the split; in other words, options on symbol `-' will be set on the upper
+     window, leaving the selected window as the bottom window.
+
+ (post-build . (fun1 fun2))
+     A list of functions to call after building the layout.
+     TODO(rgrimm): Test this more
+
+For examples of the structure, refer to built-in layouts such as
+`jail-windows--builtin-layout:code'."
+  (let ((previous-layout (assq layout-name jail-windows--registered-layouts)))
+    (if previous-layout
+        (progn (setcdr previous-layout layout-def)
+               jail-windows--registered-layouts)
+      (push (cons layout-name layout-def)
+            jail-windows--registered-layouts))))
 
 (defun jail-windows/unregister-layout (layout-name)
   "Unregister a layout"
@@ -208,12 +324,16 @@ assigned."
 
 (defun jail-windows/register-builtin-layouts ()
   "Register all the built-in layouts"
-  (jail-windows/register-layout 'code
-                                jail-windows--builtin-layouts-code))
+  (--each jail-windows--builtin-layouts-list
+    (jail-windows/register-layout it
+                                  (symbol-value
+                                   (intern (concat "jail-windows--"
+                                                  "builtin-layouts:"
+                                                  (symbol-name it)))))))
 
 (defun jail-windows/unregister-builtin-layouts ()
   "Unregister all the built-in layouts"
-  (-each '(code)
+  (-each jail-windows--builtin-layouts-list
     #'jail-windows/unregister-layout))
 
 (when jail-windows-register-builtin-layouts
@@ -255,35 +375,40 @@ splits."
           (eq horizontal nil))
       (setq horizontal nil)
     (setq horizontal t))
-  (let ((first-run t)
-        (new-window)
-        (requested-size)
-        (window-size-fun (if horizontal
-                             #'window-body-width
-                           #'window-text-height))
-        (window-min-size (if horizontal
-                             (max jail-windows-repeat-minimum-horz
-                                  jail-windows--real-repeat-minimum-horz)
-                           (max jail-windows-repeat-minimum-vert
-                                jail-windows--real-repeat-minimum-vert)))
-        (split-position (if horizontal
-                            'right
-                          'below)))
-    (let-alist option-alist
+  (let-alist option-alist
+    (let ((first-run t)
+          (new-window)
+          (requested-size)
+          (window-size-fun (if horizontal
+                               #'window-body-width
+                             #'window-text-height))
+          (window-min-size (if horizontal
+                               (max (or (when (integerp .repeat)
+                                          .repeat)
+                                        jail-windows-repeat-minimum-horz)
+                                    jail-windows--real-repeat-minimum-horz)
+                             (max (or (when (integerp .repeat)
+                                        .repeat)
+                                      jail-windows-repeat-minimum-vert)
+                                  jail-windows--real-repeat-minimum-vert)))
+          (split-position (if horizontal
+                              'right
+                            'below)))
       (setq requested-size (or .size
-                               (when .ratio
-                                 (round (* (funcall window-size-fun)
-                                           .ratio)))))
+                               (round (* (funcall window-size-fun)
+                                         (if .ratio .ratio 0.5)))))
       (while (or first-run
                  (and .repeat
                       (or (and .size
                                (<= window-min-size
                                    (- (funcall window-size-fun)
                                       .size)))
-                          (and .ratio
+                          (and (not .size)
                                (<= window-min-size
                                    (* (funcall window-size-fun)
-                                      (- 1.0 .ratio)))))))
+                                      (if .ratio
+                                          (- 1.0 .ratio)
+                                        0.5)))))))
         (setq first-run nil
               new-window (split-window nil
                                        requested-size
@@ -301,12 +426,34 @@ splits."
 (defun jail-windows--activate-handle-prev (option-alist)
   "[Internal] Handle window layout activation for selecting a previously split
 window."
-  (unless (< 1 (--count t windows-built))
+  (unless (> 1 (--count t windows-built))
     (pop windows-built)
     (select-window (car windows-built) 'norecord)
 
     ;; Reuse the "same" handler to set options like window group
     (jail-windows--activate-handle-same option-alist)))
+
+(defun jail-windows--prev-window-state (window)
+  "[Internal] Retrieve the previous window state for later restoration with
+`jail-windows--restore-prev-window-state'."
+  ;; TODO(rgrimm): Finish this.
+  (cons (window-buffer window) nil))
+
+(defun jail-windows--validated-window-list (&optional frame)
+  "[Internal] Essentially return the same value as function `window-list'. The
+difference here is that completion windows will trigger their quit action
+first, in order to get a more pure window list. In other words, pop buffers
+like *helm-mode-jail-windows/activate-layout* off the stack first."
+  ;; TODO(rgrimm): Finish this.
+  (window-list frame
+               'nominibuf
+               (frame-first-window frame)))
+
+(defun jail-windows--restore-prev-window-state (window-cons)
+  "[Internal] Restore window state that was retrieved from
+`jail-windows--prev-window-state'."
+  ;; TODO(rgrimm): Finish this.
+  (switch-to-buffer (car it) 'norecord 'force-same-window))
 
 (defun jail-windows--build-layout-by-name (layout-name)
   "[Internal] Perform the actual layout activation."
@@ -314,10 +461,8 @@ window."
         (ignore-window-parameters t)
         (prev-selected-buffer (window-buffer))
         (prev-active-buffers
-         (-map #'window-buffer
-               (window-list (selected-frame)
-                            'nominibuf
-                            (frame-first-window))))
+         (-map #'jail-windows--prev-window-state
+               (jail-windows--validated-window-list)))
         (layout-def (cdr (assq layout-name
                                jail-windows--registered-layouts)))
         (window-groups)
@@ -350,33 +495,39 @@ window."
                                          (-map #'car window-groups)))))
         (jail-windows--set-option nil
                                   'groups
-                                  (--map `(,(cons 'name it)
-                                           ,(cons 'matchers
-                                                  (cdr (assq it
-                                                             .group-defs)))
-                                           ,(cons 'windows
-                                                  (cdr (assq it
-                                                             window-groups))))
+                                  (--map `((name ,@it)
+                                           (matchers ,@(cdr (assq it
+                                                                  .group-defs)))
+                                           (windows ,@(cdr (assq
+                                                            it
+                                                            window-groups))))
                                          group-names)))
 
-      ;; Try to show all buffers that were previously showing
+      ;; Try to show all buffers that were previously showing, starting from
+      ;; top left
+      (select-window (frame-first-window) 'norecord)
       (--each prev-active-buffers
         (setq selected-window
               (jail-windows--find-window-for-buffer nil
-                                                    it
+                                                    (car it)
                                                     '()
                                                     used-windows))
         (when selected-window
           (push selected-window used-windows)
           (select-window selected-window 'norecord)
-          (switch-to-buffer it 'norecord 'force-same-window)))
+          (jail-windows--restore-prev-window-state it)))
 
       ;; Try to select the previously selected buffer; otherwise select the
       ;; first window in the frame
       (select-window (or (get-buffer-window prev-selected-buffer
                                             (selected-frame))
                          (frame-first-window))
-                     'norecord)))
+                     'norecord)
+
+      ;; Run the hooks for the layout
+      (--each .post-build
+        (when (functionp it)
+          (funcall it)))))
   (jail-windows--update-modeline t))
 
 ;;;###autoload
@@ -385,7 +536,7 @@ window."
 ACTIVATE-MODE is non-nil, this function will activate jail-windows-mode on the
 selected frame."
   (interactive (list (jail-windows--prompt-for-layout "Layout to activate: ")
-                     (unless (jail-windows/active-p)
+                     (unless (jail-windows--frame-active-p)
                        (yes-or-no-p
                         "Activate jail-windows-mode in this frame? "))))
   (unless (jail-windows/layout-p layout-name)
@@ -439,11 +590,14 @@ Returns one of the following symbols:
               (concat jail-windows--modeline-base
                       (cl-case layout-active-p
                         (extra "+")
-                        (t "=")
-                        (partial "-")))
+                        (partial "-")
+                        (t "="))
+                      (symbol-name (jail-windows--get-option nil
+                                                             'active-layout)))
             (jail-windows--set-option nil
                                       'last-layout-active
-                                      layout-active-p)))))
+                                      layout-active-p))))
+  (redraw-modeline 'all))
 
 (defun jail-windows--window-config-change-hook-fun ()
   "[Internal] Hook function for `window-configuration-change-hook' to determine
@@ -460,8 +614,8 @@ and log whether a window configuration change has "
                                layout-active-p)
         (jail-windows--update-modeline layout-active-p)))))
 
-;; TODO(rgrimm): Advise set-window-configuration to rebuild groups after it has
-;; been called
+;; TODO(rgrimm): Advise set-window-configuration to rebuild groups from window
+;; parameters after it has been called?
 
 (defun jail-windows--popwin-rebuild-groups (replicate-window-config-output)
   "[Internal] Rebuild group window lists after popwin destroys/recreates them
@@ -494,6 +648,17 @@ windows to new windows."
                        (cdr windows-cons)))))
     (jail-windows--set-option nil 'groups groups))
   replicate-window-config-output)
+
+(defadvice delete-other-windows (after jail-windows-hook activate)
+  "Detect interactive deletion of other windows and, optionally, deactivate
+`jail-windows-mode'."
+  (when (and jail-windows-deactivate-on-delete-others
+             (not (and (boundp 'jail-windows--ignore-conf-change)
+                       jail-windows--ignore-conf-change))
+             (called-interactively-p 'interactive)
+             (jail-windows--frame-active-p))
+    (jail-windows-mode -1)
+    (jail-windows--update-modeline nil)))
 
 (eval-after-load 'popwin
   `(defadvice popwin:replicate-window-config (around jail-windows-hook activate)
@@ -640,6 +805,9 @@ consideration."
         ;; Don't alter available windows if the group is missing either
         ;; matchers or windows
         (when (and (< 0 (-count #'window-live-p .windows))
+                   ;; TODO(rgrimm): Allow lists to have 0 matchers and have the
+                   ;; windows removed from available pool; only 'unassigned
+                   ;; shouldn't have 0-matchers cause window removal.
                    (< 0 (--count t .matchers)))
           ;; Check if this group matches against the buffer
           (if (let ((-compare-fn #'jail-windows--group-buffer-compare-fn))
@@ -740,7 +908,7 @@ active."
   (modify-frame-parameters nil (list (cons 'jail-windows-mode state))))
 
 (defvar jail-windows--modeline-base " JW"
-  "[Internal] Base of modeline text.")
+  "[Internal] Base of modeline text for `jail-windows-mode'.")
 (defvar jail-windows-mode nil
   "Indicator variable for variable `minor-mode-alist'.")
 
@@ -759,6 +927,16 @@ active."
               #'jail-windows--window-config-change-hook-fun
               t)
 
+    ;; Make sure mode line is updated when the frame changes
+    (add-hook 'focus-in-hook
+              #'jail-windows--update-modeline)
+
+    ;; And for some reason, it seems focus-in-hook is called on the old frame
+    ;; while focus-out-hook is called on the new one? Oh well, let's run on
+    ;; both events.
+    (add-hook 'focus-out-hook
+              #'jail-windows--update-modeline)
+
     (unless (cdr (assq 'jail-windows-groups
                        window-persistent-parameters))
       (push '(jail-windows-groups . writable)
@@ -774,6 +952,7 @@ active."
              'jail-windows-mode-hook
              (unless (jail-windows/active-p)
                'jail-windows-mode-out-hook))
+  (jail-windows--update-modeline)
   (jail-windows--message 'on-off
                          "jail-windows-mode %sabled"
                          (if (jail-windows/active-p)
