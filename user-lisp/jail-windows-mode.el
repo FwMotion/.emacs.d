@@ -179,6 +179,8 @@ status).")
                       "^\\*magit-\\(diff\\|commit\\)"
                       "^\\*Occur\\*$"
                       "^\\*Pp Eval Output\\*$"
+                      "^\\*trace-output\\*$"
+                      "^\\*vc\\(-diflf\\)?\\*$"
                       "^\\*\\(Wo\\)?Man"
                       "^COMMIT_EDITMSG$")
                 (completions "Completions\\*$"
@@ -346,26 +348,29 @@ For examples of the structure, refer to built-in layouts such as
 (defun jail-windows--activate-handle-same (option-alist)
   "[Internal] Handle window layout activation for setting options on a window
 without performing any split."
-  (let-alist option-alist
-    ;; Ensure that groups is a list, and filter out any attempt to directly
-    ;; assign 'unassigned as a group. Then set 'unassigned if there are no
-    ;; groups to assign
-    (setq .groups (or (--remove (eq 'unassigned it)
-                                (if (listp .groups)
-                                    .groups
-                                  (list .groups)))
-                      '(unassigned)))
+  (let ((selected-window (selected-window)))
+    (let-alist option-alist
+      ;; Ensure that groups is a list, and filter out any attempt to directly
+      ;; assign 'unassigned as a group. Then set 'unassigned if there are no
+      ;; groups to assign
+      (setq .groups (or (--remove (eq 'unassigned it)
+                                  (if (listp .groups)
+                                      .groups
+                                    (list .groups)))
+                        '(unassigned)))
 
-    ;; Set the window parameter so groups persist configuration changes
-    (set-window-parameter (selected-window) 'jail-windows-groups .groups)
+      ;; Set the window parameter so groups persist configuration changes
+      (set-window-parameter selected-window 'jail-windows-groups .groups)
 
-    ;; Add current window to any groups specified, and to 'unassigned
-    ;; otherwise
-    (--each .groups
-      (let ((group (assq it window-groups)))
-        (if group
-            (push (selected-window) (cdr group))
-          (push (cons it (list (selected-window))) window-groups))))))
+      ;; Add current window to any groups specified, and to 'unassigned
+      ;; otherwise
+      (--each .groups
+        (let ((group (assq it window-groups)))
+          (message "%s --> %s" selected-window (cdr group)
+          (unless (memq selected-window (cdr group))
+            (if group
+                (push selected-window (cdr group))
+              (push (cons it (list selected-window)) window-groups)))))))))
 
 (defun jail-windows--activate-handle-verthorz (horizontal option-alist)
   "[Internal] Handle window layout activation for vertical and horizontal
@@ -427,11 +432,11 @@ splits."
   "[Internal] Handle window layout activation for selecting a previously split
 window."
   (unless (> 1 (--count t windows-built))
-    (pop windows-built)
-    (select-window (car windows-built) 'norecord)
-
     ;; Reuse the "same" handler to set options like window group
-    (jail-windows--activate-handle-same option-alist)))
+    (jail-windows--activate-handle-same option-alist)
+
+    (pop windows-built)
+    (select-window (car windows-built) 'norecord)))
 
 (defun jail-windows--prev-window-state (window)
   "[Internal] Retrieve the previous window state for later restoration with
@@ -489,6 +494,10 @@ like *helm-mode-jail-windows/activate-layout* off the stack first."
         (unless (eq (car windows-built) (selected-window))
           (push (selected-window) windows-built)))
 
+      ;; In case the final element isn't a same-window *, still need to add the
+      ;; window to a group
+      (jail-windows--activate-handle-same '())
+
       ;; Set windows against group definitions
       (let* ((-compare-fn nil)
              (group-names (-uniq (-union (-map #'car .group-defs)
@@ -527,8 +536,7 @@ like *helm-mode-jail-windows/activate-layout* off the stack first."
       ;; Run the hooks for the layout
       (--each .post-build
         (when (functionp it)
-          (funcall it)))))
-  (jail-windows--update-modeline t))
+          (funcall it))))))
 
 ;;;###autoload
 (defun jail-windows/activate-layout (layout-name &optional activate-mode)
@@ -579,26 +587,6 @@ Returns one of the following symbols:
               'extra
             t))))))
 
-(defun jail-windows--update-modeline (&optional layout-active-p)
-  "[Internal] Set the modeline display text based on active state."
-  (setq jail-windows-mode
-        (when (and (jail-windows--frame-active-p)
-                   (if layout-active-p
-                       layout-active-p
-                     (setq layout-active-p (jail-windows--layout-active-p))))
-          (prog1
-              (concat jail-windows--modeline-base
-                      (cl-case layout-active-p
-                        (extra "+")
-                        (partial "-")
-                        (t "="))
-                      (symbol-name (jail-windows--get-option nil
-                                                             'active-layout)))
-            (jail-windows--set-option nil
-                                      'last-layout-active
-                                      layout-active-p))))
-  (redraw-modeline 'all))
-
 (defun jail-windows--window-config-change-hook-fun ()
   "[Internal] Hook function for `window-configuration-change-hook' to determine
 and log whether a window configuration change has "
@@ -608,11 +596,14 @@ and log whether a window configuration change has "
     (let ((layout-active-p (jail-windows--layout-active-p))
           (last-active-p (jail-windows--get-option nil 'last-layout-active)))
       (unless (eq last-active-p layout-active-p)
+        (jail-windows--set-option nil
+                                  'last-layout-active
+                                  layout-active-p)
         (jail-windows--message 'layout
                                "Jailed window configuration changed! %s --> %s"
                                last-active-p
-                               layout-active-p)
-        (jail-windows--update-modeline layout-active-p)))))
+                               layout-active-p)))
+    (redraw-modeline 'all)))
 
 ;; TODO(rgrimm): Advise set-window-configuration to rebuild groups from window
 ;; parameters after it has been called?
@@ -657,8 +648,7 @@ windows to new windows."
                        jail-windows--ignore-conf-change))
              (called-interactively-p 'interactive)
              (jail-windows--frame-active-p))
-    (jail-windows-mode -1)
-    (jail-windows--update-modeline nil)))
+    (jail-windows-mode -1)))
 
 (eval-after-load 'popwin
   `(defadvice popwin:replicate-window-config (around jail-windows-hook activate)
@@ -881,7 +871,7 @@ jail-windows-mode is active. This defers most window selection logic to
                               'reuse
                               alist))))
 
-(defadvice display-buffer (around jail-window-hook activate)
+(defadvice display-buffer (around jail-windows-hook activate)
   "[Internal] Binds `jail-windows--display-buffer-override' to the variable
 `display-buffer-overriding-action' when jail-windows-mode is active on the
 selected frame."
@@ -889,7 +879,23 @@ selected frame."
       (let ((display-buffer-overriding-action
              '((jail-windows--display-buffer-override))))
         ad-do-it)
-    (progn ad-do-it)))
+    ad-do-it))
+
+(defun jail-windows-mode-unload-function ()
+  "Support unloading of jail-windows-mode."
+  ;; Remove advices that have been added
+  (ad-disable-advice #'display-buffer 'around 'jail-windows-hook)
+  (ad-disable-advice #'delete-other-windows 'after 'jail-windows-hook)
+  (when (featurep 'popwin)
+    (ad-disable-advice #'popwin:replicate-window-config
+                       'around
+                       'jail-windows-hook))
+
+  ;; Remove modeline
+  (setq minor-mode-alist (assq-delete-all 'jail-windows-mode minor-mode-alist))
+
+  ;; Continue with regular unloading (non-nil suppresses)
+  nil)
 
 ;; TODO: (defadvice display-buffer-other-frame ...)?
 
@@ -907,12 +913,25 @@ parameters."
 active."
   (modify-frame-parameters nil (list (cons 'jail-windows-mode state))))
 
+(defun jail-windows--modeline (&optional frame)
+  "[Internal] Set the modeline display text based on active state."
+  (let ((layout-active-p (jail-windows--layout-active-p frame)))
+    (when (and (jail-windows--frame-active-p frame)
+               layout-active-p)
+      (concat jail-windows--modeline-base
+              (cl-case layout-active-p
+                (extra "+")
+                (partial "-")
+                (t "="))
+              (symbol-name (jail-windows--get-option nil
+                                                     'active-layout))))))
+
 (defvar jail-windows--modeline-base " JW"
   "[Internal] Base of modeline text for `jail-windows-mode'.")
 (defvar jail-windows-mode nil
   "Indicator variable for variable `minor-mode-alist'.")
 
-(push '(jail-windows-mode jail-windows-mode)
+(push '(jail-windows-mode (:eval (jail-windows--modeline (selected-frame))))
       minor-mode-alist)
 
 ;;;###autoload
@@ -926,16 +945,6 @@ active."
     (add-hook 'window-configuration-change-hook
               #'jail-windows--window-config-change-hook-fun
               t)
-
-    ;; Make sure mode line is updated when the frame changes
-    (add-hook 'focus-in-hook
-              #'jail-windows--update-modeline)
-
-    ;; And for some reason, it seems focus-in-hook is called on the old frame
-    ;; while focus-out-hook is called on the new one? Oh well, let's run on
-    ;; both events.
-    (add-hook 'focus-out-hook
-              #'jail-windows--update-modeline)
 
     (unless (cdr (assq 'jail-windows-groups
                        window-persistent-parameters))
@@ -952,11 +961,15 @@ active."
              'jail-windows-mode-hook
              (unless (jail-windows/active-p)
                'jail-windows-mode-out-hook))
-  (jail-windows--update-modeline)
   (jail-windows--message 'on-off
                          "jail-windows-mode %sabled"
                          (if (jail-windows/active-p)
                              "en"
-                           "dis")))
+                           "dis"))
+  (let (any-frame-active)
+    (--each-while (frame-list)
+        (not any-frame-active)
+      (setq any-frame-active (jail-windows--frame-active-p it)))
+    (setq jail-windows-mode any-frame-active)))
 
 (provide 'jail-windows-mode)
