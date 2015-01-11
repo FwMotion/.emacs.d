@@ -180,7 +180,7 @@ status).")
                       "^\\*Occur\\*$"
                       "^\\*Pp Eval Output\\*$"
                       "^\\*trace-output\\*$"
-                      "^\\*vc\\(-diflf\\)?\\*$"
+                      "^\\*vc\\(-diff\\)?\\*$"
                       "^\\*\\(Wo\\)?Man"
                       "^COMMIT_EDITMSG$")
                 (completions "Completions\\*$"
