@@ -163,13 +163,18 @@ information buffers (eg help, info, grep) as well as compilation output, source
 diffs, and comint buffers. The bottom right window is intended to show
 completion options and source control overview buffers (eg, vc-dir or magit
 status).")
-    (group-defs (help "^\\*Apropos\\*$"
+    (group-defs (help (lambda (buffer)
+                        "Test for eshell buffer name."
+                        (equal (buffer-name)
+                               (if (boundp 'eshell-buffer-name)
+                                   eshell-buffer-name
+                                 "*eshell*")))
+                      "^\\*Apropos\\*$"
                       "^\\*Backtrace\\*$"
                       "^\\*Colors\\*$"
                       "^\\*Compile-Log\\*$"
                       "^\\*Customize "
                       "^\\*ediff.*\\*$"
-                      "^\\*e?shell"
                       "^\\*Help\\*$"
                       "^\\*h?grep\\*$"
                       "^\\*info\\*$"
@@ -179,6 +184,7 @@ status).")
                       "^\\*magit-\\(diff\\|commit\\)"
                       "^\\*Occur\\*$"
                       "^\\*Pp Eval Output\\*$"
+                      "^\\*shell"
                       "^\\*trace-output\\*$"
                       "^\\*vc\\(-diff\\)?\\*$"
                       "^\\*\\(Wo\\)?Man"
@@ -249,7 +255,7 @@ windows. No groups are defined, so all windows are available for all buffers")
 
 (defun jail-windows--message (type &rest args)
   "[Internal] Debug messaging."
-  (when (let ((-compare-fn #'eq)) (-contains? jail-windows-debug-messages type))
+  (when (memq type jail-windows-debug-messages)
     (apply #'message args)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -268,7 +274,7 @@ LAYOUT-DEF should be an alist containing elements with the following cells:
      any other relevant information. This cons cell is not used by the code.
 
  (group-defs (group1 (\"...\"
-                      (lambda () ...)
+                      (lambda (buffer) ...)
                       t)))
      An alist of group names to lists of group matchers. Group matchers can be
      one of several types: strings are treated as regexps that will test
