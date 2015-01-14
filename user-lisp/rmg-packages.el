@@ -30,9 +30,6 @@ package to a list of missing packages."
 (add-to-list 'package-archives
              '("melpa-stable" . "http://stable.melpa.org/packages/")
              t)
-(add-to-list 'package-archives
-             '("melpa" . "http://melpa.org/packages/")
-             t)
 
 (setq package-user-dir (concat rmg:user-emacs-dir "/elpa"))
 
@@ -42,18 +39,59 @@ package to a list of missing packages."
 
 (package-initialize)
 
+;; Initialize package contents
+(when (not package-archive-contents)
+  (package-refresh-contents))
+
+;; Install any missing packages from stable repos
+(dolist (pkg rmg:packages)
+  (when (not (package-installed-p pkg))
+    (if (assoc pkg package-archive-contents)
+        (package-install pkg)
+      (push pkg rmg:packages-unstable))))
+
+;; Install any missing packages from unstable repos
+(when (rmg-try-require 'dash)
+  (when (--any? (not (package-installed-p it)) rmg:packages-unstable)
+    (let ((package-archives '(("melpa" . "http://melpa.org/packages/"))))
+      (package-refresh-contents)
+      (dolist (pkg rmg:packages-unstable)
+        (when (and (not (package-installed-p pkg))
+                   (assoc pkg package-archive-contents))
+          (package-install pkg))))
+    (package-refresh-contents)))
+
+;; Compile any packages that came with source-controlled home
 (when (and (rmg-try-require 'f)
            (rmg-try-require 'dash))
-  (defun was-compiled-p (path)
+  (defun rmg--was-compiled-p (path)
     "Does the directory at PATH contain any .elc files?"
     (--any-p (f-ext? it "elc") (f-files path)))
 
-  (defun ensure-packages-compiled ()
-    "If any packages installed with package.el aren't compiled yet, compile them."
+  (defun rmg/ensure-packages-compiled ()
+    "If any packages installed with package.el aren't compiled yet, compile
+them."
+    (interactive)
     (--each (f-directories package-user-dir)
-      (unless (was-compiled-p it)
+      (unless (rmg--was-compiled-p it)
         (byte-recompile-directory it 0))))
 
-  (ensure-packages-compiled))
+  (rmg/ensure-packages-compiled))
+
+;; List packages that are installed and not part of requested list
+(when (rmg-try-require 'dash)
+  (defun rmg/list-unaccounted-packages ()
+    "Like `package-list-packages', but shows only the packages that are
+installed and are not in `rmg:packages'. Useful for cleaning out unwanted
+packages.
+
+Inspired by https://stackoverflow.com/a/15363401"
+    (interactive)
+    (package-show-package-list
+     (--filter (and (not (memq it rmg:packages))
+                    (not (memq it rmg:packages-unstable))
+                    (not (package-built-in-p it))
+                    (package-installed-p it))
+               (mapcar #'car package-archive-contents)))))
 
 (provide 'rmg-packages)

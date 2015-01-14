@@ -13,10 +13,6 @@
   (file-name-directory user-init-file)
   "Real `user-emacs-directory' based on init-file location.")
 
-;; Move customizations to separate file
-(setq custom-file (concat rmg:user-emacs-dir "custom.el"))
-(load custom-file 'noerror)
-
 (defgroup rmg nil
   "Customizations specific to my setup."
   :prefix "rmg-")
@@ -24,12 +20,53 @@
 ;; Load custom lisp
 (add-to-list 'load-path (concat rmg:user-emacs-dir "user-lisp/"))
 
+;; Standard package installs
+(defconst rmg:packages '(anzu
+                         dash
+                         delight
+                         exec-path-from-shell
+                         f
+                         flycheck
+                         google-c-style
+                         guide-key
+                         helm
+                         helm-projectile
+                         hl-line+
+                         jquery-doc
+                         js2-mode
+                         markdown-mode
+                         org
+                         projectile
+                         s
+                         smex
+                         undo-tree
+
+                         ;; For jail-windows-mode
+                         ;; TODO(rgrimm): Move these out after
+                         ;; jail-windows-mode is its own package
+                         dash-functional
+                         let-alist
+
+                         ;; Themes
+                         moe-theme
+                         twilight-anti-bright-theme
+                         twilight-theme)
+  "Standard packages that should be automatically installed from stable repo")
+
+(defvar rmg:packages-unstable '(magit
+                                powerline)
+  "List of packages not available in stable repos or that should prefer unstable.")
+
 ;; Determine running environment and set up package loading
 (require 'rmg-environment)
 (require 'rmg-hooks)
 (require 'rmg-packages)
 
-;; Before anything else, disable Aquamacs stuff
+;; Move customizations to separate file
+(setq custom-file (concat rmg:user-emacs-dir "custom.el"))
+(load custom-file 'noerror)
+
+;; Before most of the regular custom inits
 (when running-aquamacs
   (rmg-try-require 'rmg-aquamacs))
 

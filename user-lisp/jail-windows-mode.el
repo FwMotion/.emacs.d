@@ -186,15 +186,16 @@ status).")
                       "^\\*Pp Eval Output\\*$"
                       "^\\*shell"
                       "^\\*trace-output\\*$"
-                      "^\\*vc\\(-diff\\)?\\*$"
+                      "^\\*vc\\(-diff\\|-log\\)?\\*$"
                       "^\\*\\(Wo\\)?Man"
                       "^COMMIT_EDITMSG$")
                 (completions "Completions\\*$"
                              "^\\*elisp macroexpansion\\*$"
                              "^\\*helm\\(-\\| \\)"
+                             "^\\*log-edit-files\\*$"
                              "^\\*magit"
                              "^\\*Process List\\*$"
-                             "^\\*vc-dir\\*$"
+                             "^\\*vc-dir\\*"
                              "^ widget-choose$"))
     (window-layout (| (size . 80)
                       (repeat . t))

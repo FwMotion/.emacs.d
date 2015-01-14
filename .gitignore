@@ -2,6 +2,7 @@
 /elpa/*.txt
 /elpa/archives
 /elpa/*.signed
+/elpa/gnupg/
 /el-get/*
 
 # Ignore backups

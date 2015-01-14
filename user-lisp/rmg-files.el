@@ -8,14 +8,19 @@
                               (make-directory rmg:state-directory t)))))
 
 (set-language-environment 'utf-8)
-(prefer-coding-system 'utf-8-dos)
+(prefer-coding-system (if running-on-windows
+                          'utf-8-dos
+                        'utf-8))
 ;; Default coding (prefer-utf-8 if available; otherwise, utf-8)
 (defconst rmg:preferred-coding-system (or (ignore-errors
                                             (coding-system-base 'prefer-utf-8))
                                           'utf-8))
 ;; Default to DOS-style line ends; this is most portable to other platforms
-(defconst rmg:preferred-coding-system-eol (coding-system-change-eol-conversion
-                                           rmg:preferred-coding-system 'dos))
+(defconst rmg:preferred-coding-system-eol
+  (coding-system-change-eol-conversion rmg:preferred-coding-system
+                                       (if running-on-windows
+                                           'dos
+                                         'unix)))
 (set-default-coding-systems rmg:preferred-coding-system-eol)
 (set-selection-coding-system rmg:preferred-coding-system-eol)
 (setq locale-coding-system rmg:preferred-coding-system)
