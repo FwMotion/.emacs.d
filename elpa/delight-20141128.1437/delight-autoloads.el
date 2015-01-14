@@ -1,10 +1,9 @@
 ;;; delight-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-
+(add-to-list 'load-path (or (file-name-directory #$) (car load-path)))
 
-;;;### (autoloads (delight) "delight" "delight.el" (21663 45990 139135
-;;;;;;  166000))
+;;;### (autoloads nil "delight" "delight.el" (21686 5626 636820 41000))
 ;;; Generated autoloads from delight.el
 
 (autoload 'delight "delight" "\
@@ -35,16 +34,9 @@ to prevent the mode being treated as a minor mode.
 
 ;;;***
 
-;;;### (autoloads nil nil ("delight-pkg.el") (21663 45990 168199
-;;;;;;  969000))
-
-;;;***
-
-(provide 'delight-autoloads)
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
-;; coding: utf-8
 ;; End:
 ;;; delight-autoloads.el ends here

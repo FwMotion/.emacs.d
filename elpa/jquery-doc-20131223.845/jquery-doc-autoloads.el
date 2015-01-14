@@ -1,10 +1,10 @@
 ;;; jquery-doc-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-
+(add-to-list 'load-path (or (file-name-directory #$) (car load-path)))
 
-;;;### (autoloads (company-jquery jquery-doc-ac-prefix) "jquery-doc"
-;;;;;;  "jquery-doc.el" (21663 59995 248582 754000))
+;;;### (autoloads nil "jquery-doc" "jquery-doc.el" (21686 5625 584814
+;;;;;;  828000))
 ;;; Generated autoloads from jquery-doc.el
 
 (autoload 'jquery-doc-ac-prefix "jquery-doc" "\
@@ -22,15 +22,13 @@
 ;;;***
 
 ;;;### (autoloads nil nil ("jquery-doc-data.el" "jquery-doc-pkg.el")
-;;;;;;  (21663 59995 271188 911000))
+;;;;;;  (21686 5625 604066 296000))
 
 ;;;***
 
-(provide 'jquery-doc-autoloads)
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
-;; coding: utf-8
 ;; End:
 ;;; jquery-doc-autoloads.el ends here

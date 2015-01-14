@@ -1,11 +1,10 @@
 ;;; powerline-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-
+(add-to-list 'load-path (or (file-name-directory #$) (car load-path)))
 
-;;;### (autoloads (powerline-fill powerline-raw defpowerline powerline-concat
-;;;;;;  powerline-mouse powerline-hud) "powerline" "powerline.el"
-;;;;;;  (21674 10906 21027 686000))
+;;;### (autoloads nil "powerline" "powerline.el" (21686 5628 72827
+;;;;;;  163000))
 ;;; Generated autoloads from powerline.el
 
 (autoload 'powerline-hud "powerline" "\
@@ -48,9 +47,8 @@ Return empty space using FACE and leaving RESERVE space on the right.
 
 ;;;***
 
-;;;### (autoloads (powerline-nano-theme powerline-vim-theme powerline-center-theme
-;;;;;;  powerline-default-theme) "powerline-themes" "powerline-themes.el"
-;;;;;;  (21674 10905 881027 687000))
+;;;### (autoloads nil "powerline-themes" "powerline-themes.el" (21686
+;;;;;;  5628 40827 4000))
 ;;; Generated autoloads from powerline-themes.el
 
 (autoload 'powerline-default-theme "powerline-themes" "\
@@ -76,15 +74,13 @@ Setup a nano-like mode-line.
 ;;;***
 
 ;;;### (autoloads nil nil ("powerline-pkg.el" "powerline-separators.el")
-;;;;;;  (21674 10906 81126 840000))
+;;;;;;  (21686 5628 93729 476000))
 
 ;;;***
 
-(provide 'powerline-autoloads)
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
-;; coding: utf-8
 ;; End:
 ;;; powerline-autoloads.el ends here
