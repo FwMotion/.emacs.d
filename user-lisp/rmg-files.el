@@ -43,31 +43,10 @@
       `((".*" ,(concat rmg:user-emacs-dir "auto-save/") t))
       tramp-auto-save-directory (concat rmg:user-emacs-dir "auto-save/"))
 
-;; Server auth
-(setq server-auth-dir (concat rmg:state-directory "server/"))
-
-;; Cookies
-(setq url-cookie-file (concat rmg:state-directory "url-cookies"))
-
-;; Game scores
-(setq tetris-score-file (concat rmg:state-directory "tetris-scores"))
-
 ;; Save pointer location
 (when (rmg-try-require 'saveplace)
   (setq-default save-place t)
   (setq save-place-file (concat rmg:state-directory "places")))
-
-;; Abbreviations
-(setq abbrev-file-name (concat rmg:state-directory "abbrev_defs"))
-
-;; Desktop
-(setq revive:app-restore-path rmg:state-directory
-      revive:desktop-base-file-name "SessionDesktop.el")
-
-;; Eshell
-(setq eshell-directory-name (concat rmg:user-emacs-dir "eshell/"))
-(setq eshell-login-script (concat eshell-directory-name "login")
-      eshell-rc-script (concat eshell-directory-name "profile"))
 
 ;; Exec path from shell
 (when (and (not running-on-windows) (rmg-try-require 'exec-path-from-shell))
@@ -78,8 +57,8 @@
 
 ;; Auto-revert
 (global-auto-revert-mode 1)
-(setq global-auto-revert-non-file-buffers t)
-(setq auto-revert-verbose nil)
+(setq global-auto-revert-non-file-buffers t
+      auto-revert-verbose nil)
 
 ;; Fix a problem with auto-reverting buffers sometimes recentering
 (defcustom rmg-message-on-revert-recenter nil
@@ -93,27 +72,56 @@
         (message "Skipping recenter after revert."))
     ad-do-it))
 
-;; ido save file
-(setq ido-save-directory-list-file (concat rmg:state-directory "ido.last"))
-
 ;; Final new-line
 (setq-default require-final-newline t)
 
-;; Smex save file
-(setq smex-save-file (concat rmg:state-directory "smex-items"))
+;; Set a bunch of variables; starting with ido's save file
+(setq ido-save-directory-list-file (concat rmg:state-directory "ido.last")
 
-;; Helm files
-(setq helm-documentation-file (concat rmg:state-directory "helm-doc.org")
-      helm-adaptive-history-file (concat rmg:state-directory "helm-history"))
+      ;; Smex save file
+      smex-save-file (concat rmg:state-directory "smex-items")
 
-;; Recentf
-(setq recentf-save-file (concat rmg:state-directory "recentf")
+      ;; Helm files
+      helm-documentation-file (concat rmg:state-directory "helm-doc.org")
+      helm-adaptive-history-file (concat rmg:state-directory "helm-history")
+
+      ;; Recentf
+      recentf-save-file (concat rmg:state-directory "recentf")
       recentf-max-saved-items 40
-      recentf-max-menu-items recentf-max-saved-items)
+      recentf-max-menu-items recentf-max-saved-items
 
-;; Org-mode stuff
-(setq org-clock-persist-file (concat rmg:state-directory "org-clock-save.el")
-      org-id-locations-file (concat rmg:state-directory "org-id-locations"))
+      ;; Org-mode stuff
+      org-clock-persist-file (concat rmg:state-directory "org-clock-save.el")
+      org-id-locations-file (concat rmg:state-directory "org-id-locations")
+
+      ;; Remember
+      remember-data-file (concat rmg:state-directory "remember.notes")
+
+      ;; Server auth
+      server-auth-dir (concat rmg:state-directory "server/")
+
+      ;; Cookies
+      url-cookie-file (concat rmg:state-directory "url-cookies")
+
+      ;; Game scores
+      tetris-score-file (concat rmg:state-directory "tetris-scores")
+
+      ;; Abbreviations
+      abbrev-file-name (concat rmg:state-directory "abbrev_defs")
+
+      ;; Desktop
+      revive:app-restore-path rmg:state-directory
+      revive:desktop-base-file-name "SessionDesktop.el"
+
+      ;; Projectile
+      projectile-cache-file (concat rmg:state-directory "projectile.cache")
+      projectile-known-projects-file (concat rmg:state-directory
+                                             "projectile-bookmarks.eld")
+
+      ;; Eshell
+      eshell-directory-name (concat rmg:user-emacs-dir "eshell/")
+      eshell-login-script (concat eshell-directory-name "login")
+      eshell-rc-script (concat eshell-directory-name "profile"))
 
 ;; Auto-trim trailing spaces
 (defcustom rmg-auto-update-whitespace t

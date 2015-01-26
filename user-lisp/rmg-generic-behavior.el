@@ -39,9 +39,16 @@
   (helm-mode 1)
 
   ;; Other settings
-  (setq ;helm-prevent-escaping-from-minibuffer nil
-   helm-buffers-fuzzy-matching t
-   helm-man-or-woman-function 'woman))
+  (setq helm-prevent-escaping-from-minibuffer t
+        helm-buffers-fuzzy-matching t
+        helm-man-or-woman-function 'woman))
+
+  ;; And helm-projectile
+  ;;(when (fboundp 'projectile-global-mode)
+  ;;  (projectile-global-mode)
+  ;;  (setq projectile-completion-system 'helm
+  ;;        projectile-switch-project-action 'helm-projectile)
+  ;;  (helm-projectile-on)))
 
 ;; Allow recursive minibuffers (but not in helm)
 (setq enable-recursive-minibuffers t)
