@@ -451,6 +451,12 @@ window."
   ;; TODO(rgrimm): Finish this.
   (cons (window-buffer window) nil))
 
+(defun jail-windows--restore-prev-window-state (window-cons)
+  "[Internal] Restore window state that was retrieved from
+`jail-windows--prev-window-state'."
+  ;; TODO(rgrimm): Finish this.
+  (switch-to-buffer (car it) 'norecord 'force-same-window))
+
 (defun jail-windows--validated-window-list (&optional frame)
   "[Internal] Essentially return the same value as function `window-list'. The
 difference here is that completion windows will trigger their quit action
@@ -460,12 +466,6 @@ like *helm-mode-jail-windows/activate-layout* off the stack first."
   (window-list frame
                'nominibuf
                (frame-first-window frame)))
-
-(defun jail-windows--restore-prev-window-state (window-cons)
-  "[Internal] Restore window state that was retrieved from
-`jail-windows--prev-window-state'."
-  ;; TODO(rgrimm): Finish this.
-  (switch-to-buffer (car it) 'norecord 'force-same-window))
 
 (defun jail-windows--build-layout-by-name (layout-name)
   "[Internal] Perform the actual layout activation."
@@ -483,7 +483,9 @@ like *helm-mode-jail-windows/activate-layout* off the stack first."
         (selected-window)
         (used-windows '()))
     (select-window (car windows-built) 'norecord)
-    (switch-to-buffer (or jail-windows-new-window-buffer
+    (switch-to-buffer (or (and (or (bufferp jail-windows-new-window-buffer)
+                                   (stringp jail-windows-new-window-buffer))
+                               jail-windows-new-window-buffer)
                           "*scratch*")
                       'norecord
                       'force-same-window)
