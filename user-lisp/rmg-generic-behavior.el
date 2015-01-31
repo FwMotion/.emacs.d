@@ -24,6 +24,9 @@
                (when (display-mouse-p)
                  (setq mouse-yank-at-point t)))
 
+;; Workaround massive undo info in *Buffer List*
+(add-hook 'Buffer-menu-mode-hook 'buffer-disable-undo)
+
 ;; Don't make sounds
 (setq visible-bell t)
 
