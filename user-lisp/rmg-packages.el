@@ -28,7 +28,7 @@ package to a list of missing packages."
              '("marmalade" . "https://marmalade-repo.org/packages/")
              t)
 (add-to-list 'package-archives
-             '("melpa-stable" . "http://stable.melpa.org/packages/")
+             '("melpa-stable" . "https://stable.melpa.org/packages/")
              t)
 
 (setq package-user-dir (concat rmg:user-emacs-dir "/elpa"))
@@ -53,7 +53,7 @@ package to a list of missing packages."
 ;; Install any missing packages from unstable repos
 (when (rmg-try-require 'dash)
   (when (--any? (not (package-installed-p it)) rmg:packages-unstable)
-    (let ((package-archives '(("melpa" . "http://melpa.org/packages/"))))
+    (let ((package-archives '(("melpa" . "https://melpa.org/packages/"))))
       (package-refresh-contents)
       (dolist (pkg rmg:packages-unstable)
         (when (and (not (package-installed-p pkg))

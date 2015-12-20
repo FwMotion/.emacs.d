@@ -10,7 +10,7 @@
 
 ;; Fix package loading on Aquamacs
 (defvar rmg:user-emacs-dir
-  (file-name-directory user-init-file)
+  (file-name-directory (or user-init-file load-file-name))
   "Real `user-emacs-directory' based on init-file location.")
 
 (defgroup rmg nil
@@ -35,6 +35,7 @@
                          jquery-doc
                          js2-mode
                          markdown-mode
+                         magit
                          org
                          projectile
                          s
@@ -53,8 +54,7 @@
                          twilight-theme)
   "Standard packages that should be automatically installed from stable repo")
 
-(defvar rmg:packages-unstable '(magit
-                                powerline)
+(defvar rmg:packages-unstable '(powerline)
   "List of packages not available in stable repos or that should prefer unstable.")
 
 ;; Determine running environment and set up package loading

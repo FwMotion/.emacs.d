@@ -35,16 +35,18 @@
           (lambda ()
             (semantic-mode 1)))
 
-;; helm for M-x
+;; helm for most things, including M-x
 (when (rmg-try-require 'helm-config)
-  ;; Just to be sure; I prefer ido style for most things, actually...
-  ;; maybe not.
-  (helm-mode 1)
+  ;; helm-mode activates tramp as well, which starts SSH connecting to
+  ;; host.does.not.exist, which waits for a connection timeout. UGH.
+  ;; So don't start it until a couple seconds after init.
+  (run-at-time 2 nil (lambda ()
+                       (helm-mode 1)
 
-  ;; Other settings
-  (setq helm-prevent-escaping-from-minibuffer t
-        helm-buffers-fuzzy-matching t
-        helm-man-or-woman-function 'woman))
+                       ;; Other settings
+                       (setq helm-prevent-escaping-from-minibuffer t
+                             helm-buffers-fuzzy-matching t
+                             helm-man-or-woman-function 'woman))))
 
   ;; And helm-projectile
   ;;(when (fboundp 'projectile-global-mode)
