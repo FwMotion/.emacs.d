@@ -1,3 +1,5 @@
+;; Note: This file is mostly unused, since I prefer http://emacsformacosx.com/
+
 ;; Use same style of keys from non-Aquamacs
 (osx-key-mode -1)
 
