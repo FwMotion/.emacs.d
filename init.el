@@ -24,6 +24,7 @@
 (defconst rmg:packages '(anzu
                          dash
                          delight
+                         editorconfig
                          exec-path-from-shell
                          f
                          flycheck
@@ -97,6 +98,7 @@
 ;; - flycheck
 ;; - JS2-mode
 ;; - key for jquery-doc -- maybe C-h C-j? Only in JS modes?
+;; - clean up and release jail-windows
 
 (rmg-on-startup (message "Missing packages: %s"
                          rmg-missing-packages-list))

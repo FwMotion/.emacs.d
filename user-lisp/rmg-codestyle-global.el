@@ -13,4 +13,7 @@ defaults will be set to use tabs."
 (setq default-tab-width rmg-default-indent-width)
 (setq-default tab-width rmg-default-indent-width)
 
+;; Use editorconfig
+(editorconfig-mode 1)
+
 (provide 'rmg-codestyle-global)
