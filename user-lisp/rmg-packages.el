@@ -35,7 +35,6 @@ package to a list of missing packages."
 
 ;; TODO(rgrimm): defcustom to select HTTP or HTTPS (default HTTPS), then act
 ;; on it. Also convert default URLs to HTTPS when requested.
-;; Currently MELPA doesn't support HTTPS :-(
 
 (package-initialize)
 

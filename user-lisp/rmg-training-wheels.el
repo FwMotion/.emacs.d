@@ -25,8 +25,4 @@
 (when (rmg-try-require 'jquery-doc)
   (jquery-doc-setup))
 
-;; Allow recursive minibuffers
-;;(setq enable-recursive-minibuffers t)
-;;(minibuffer-depth-indicate-mode 1)
-
 (provide 'rmg-training-wheels)

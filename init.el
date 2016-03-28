@@ -22,37 +22,40 @@
 
 ;; Standard package installs
 (defconst rmg:packages '(anzu
-                         dash
-                         delight
-                         editorconfig
-                         exec-path-from-shell
-                         f
-                         flycheck
-                         google-c-style
-                         guide-key
-                         helm
-                         helm-projectile
-                         hl-line+
-                         jquery-doc
-                         js2-mode
-                         markdown-mode
-                         magit
-                         org
-                         projectile
-                         s
-                         smex
-                         undo-tree
+                          dash
+                          delight
+                          docker
+                          dockerfile-mode
+                          editorconfig
+                          exec-path-from-shell
+                          f
+                          flycheck
+                          google-c-style
+                          guide-key
+                          helm
+                          helm-projectile
+                          hl-line+
+                          jquery-doc
+                          js2-mode
+                          markdown-mode
+                          magit
+                          org
+                          projectile
+                          s
+                          smex
+                          undo-tree
+                          yaml-mode
 
-                         ;; For jail-windows-mode
-                         ;; TODO(rgrimm): Move these out after
-                         ;; jail-windows-mode is its own package
-                         dash-functional
-                         let-alist
+                          ;; For jail-windows-mode
+                          ;; TODO(rgrimm): Move these out after
+                          ;; jail-windows-mode is its own package
+                          dash-functional
+                          let-alist
 
-                         ;; Themes
-                         moe-theme
-                         twilight-anti-bright-theme
-                         twilight-theme)
+                          ;; Themes
+                          moe-theme
+                          twilight-anti-bright-theme
+                          twilight-theme)
   "Standard packages that should be automatically installed from stable repo")
 
 (defvar rmg:packages-unstable '(powerline)

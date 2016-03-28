@@ -63,4 +63,21 @@
 (when (rmg-try-require 'undo-tree)
   (global-undo-tree-mode 1))
 
+;; docker set up if docker-machine is available
+(when (and
+        (locate-file "docker-machine"
+          exec-path
+          exec-suffixes
+          'file-executable-p)
+        (rmg-try-require 'docker))
+  ;; Set up docker machine environment variables
+  (with-temp-buffer
+    (shell-command
+      "docker-machine env --shell emacs default"
+      (current-buffer))
+    (eval-buffer))
+
+  ;; Turn on global docker mode (C-c d ...)
+  (docker-global-mode 1))
+
 (provide 'rmg-generic-behavior)
