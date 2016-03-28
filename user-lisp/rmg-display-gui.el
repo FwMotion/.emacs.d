@@ -11,7 +11,9 @@
                                                 "@"
                                                 (downcase system-name)))
 
-               ;; No scrollbars, toolbars, or tabbars
+               ;; No menubars, scrollbars, toolbars, or tabbars
+               (when (fboundp 'menu-bar-mode)
+                 (menu-bar-mode -1))
                (when (fboundp 'scroll-bar-mode)
                  (scroll-bar-mode -1))
                (when (fboundp 'tool-bar-mode)
