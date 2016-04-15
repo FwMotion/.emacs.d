@@ -63,6 +63,11 @@
 (when (rmg-try-require 'undo-tree)
   (global-undo-tree-mode 1))
 
+(defcustom rmg-docker-machine "default"
+  "Machine to configure by default on emacs launch."
+  :type 'string
+  :group 'rmg)
+
 ;; docker set up if docker-machine is available
 (when (and
         (locate-file "docker-machine"
@@ -71,11 +76,21 @@
           'file-executable-p)
         (rmg-try-require 'docker))
   ;; Set up docker machine environment variables
+  ;; TODO: Move this to a function, and call it whenever rmg-docker-machine
+  ;; changes.
   (with-temp-buffer
     (shell-command
-      "docker-machine env --shell emacs default"
+      (concat "docker-machine status " rmg-docker-machine)
       (current-buffer))
-    (eval-buffer))
+    (if (string-equal (s-trim (buffer-string)) "Running")
+      (progn
+        (shell-command
+          (concat "docker-machine env --shell emacs " rmg-docker-machine)
+          (current-buffer))
+        (eval-buffer)
+        (message "Using docker machine `%s'." rmg-docker-machine))
+      (message "Docker machine `%s' not running; docker host not configured. (state: %s)"
+        rmg-docker-machine (buffer-string))))
 
   ;; Turn on global docker mode (C-c d ...)
   (docker-global-mode 1))
