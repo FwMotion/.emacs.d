@@ -40,7 +40,8 @@
 ;; I love the code comments of diminish; yet I had to replace with delight
 (when (rmg-try-require 'delight)
   (delight '((anzu-mode nil "anzu")
-             (docker-mode nil "docker")
+              ;;(docker-mode nil "docker")
+             (editorconfig-mode nil "editorconfig-mode")
              (global-whitespace-mode nil "whitespace")
              (guide-key-mode nil "guide-key")
              (helm-mode nil "helm-mode")

@@ -17,6 +17,9 @@
            (display-multi-frame-p))
   (global-set-key (kbd "<f11>") #'rmg/toggle-maximize-frame))
 
+;; Don't suspend-frame ever
+(global-unset-key (kbd "C-z"))
+
 ;; Preferred window layout
 (global-set-key (kbd "C-x C-1") 'rmg/setup-windows-1)
 (global-set-key (kbd "C-x C-!") 'rmg/setup-windows-1)

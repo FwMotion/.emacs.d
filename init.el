@@ -1,6 +1,6 @@
 ;; User info
 (setq user-full-name "Robert Grimm"
-      user-mail-address (rot13 "tevzz.ebo@tznvy.pbz"))
+      user-mail-address (rot13 "ebo@sjzbgvba.pbz"))
 
 ;; Early removal of GUI scrollbars and toolbar
 (when (fboundp 'scroll-bar-mode)
@@ -24,8 +24,8 @@
 (defconst rmg:packages '(anzu
                           dash
                           delight
-                          docker
-                          dockerfile-mode
+                          ;;docker
+                          ;;dockerfile-mode
                           editorconfig
                           exec-path-from-shell
                           f
@@ -33,14 +33,14 @@
                           google-c-style
                           guide-key
                           helm
-                          helm-projectile
-                          hl-line+
-                          jquery-doc
-                          js2-mode
+                          ;;helm-projectile
+                          ;;hl-line+
+                          ;;jquery-doc
+                          ;;js2-mode
                           markdown-mode
                           magit
                           org
-                          projectile
+                          ;;projectile
                           s
                           smex
                           undo-tree
@@ -53,18 +53,22 @@
                           let-alist
 
                           ;; Themes
+                          powerline
                           moe-theme
                           twilight-anti-bright-theme
                           twilight-theme)
   "Standard packages that should be automatically installed from stable repo")
 
-(defvar rmg:packages-unstable '(powerline)
-  "List of packages not available in stable repos or that should prefer unstable.")
+(defvar rmg:packages-unstable '()
+  "List of packages not available in stable repos or should prefer unstable.")
 
 ;; Determine running environment and set up package loading
 (require 'rmg-environment)
 (require 'rmg-hooks)
 (require 'rmg-packages)
+
+;; Avoid Package.el adding this line again
+(package-initialize t)
 
 ;; Move customizations to separate file
 (setq custom-file (concat rmg:user-emacs-dir "custom.el"))

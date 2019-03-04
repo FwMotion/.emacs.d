@@ -24,9 +24,12 @@ package to a list of missing packages."
 
 ;; ELPA set up
 (rmg-try-require 'package)
-(add-to-list 'package-archives
-             '("marmalade" . "https://marmalade-repo.org/packages/")
-             t)
+
+;; Repository configuration
+
+;;(add-to-list 'package-archives
+;;             '("marmalade" . "https://marmalade-repo.org/packages/")
+;;             t)
 (add-to-list 'package-archives
              '("melpa-stable" . "https://stable.melpa.org/packages/")
              t)

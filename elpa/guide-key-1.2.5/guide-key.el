@@ -4,8 +4,8 @@
 
 ;; Author: Tsunenobu Kai <kai2nenobu@gmail.com>
 ;; URL: https://github.com/kai2nenobu/guide-key
+;; Package-Version: 1.2.5
 ;; Version: 1.2.5
-;; X-Original-Version: 1.2.5
 ;; Package-Requires: ((popwin "0.3.0"))
 ;; Keywords: help convenience
 

@@ -1,7 +1,9 @@
-(when (fboundp 'hl-line-toggle-when-idle)
-  (hl-line-when-idle-interval 2)
-  (rmg-on-frames t nil nil
-                 (hl-line-toggle-when-idle 1 nil)))
+(if (fboundp 'hl-line-toggle-when-idle)
+  (progn
+    (hl-line-when-idle-interval 2)
+    (rmg-on-frames t nil nil
+      (hl-line-toggle-when-idle 1 nil)))
+  (global-hl-line-mode 1))
 
 ;; Set up frames
 (rmg-on-frames t nil nil

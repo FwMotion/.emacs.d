@@ -43,6 +43,9 @@
   (run-at-time 2 nil (lambda ()
                        (helm-mode 1)
 
+                       ;; Avoid slow loading later
+                       (rmg-try-require 'image-file)
+
                        ;; Other settings
                        (setq helm-prevent-escaping-from-minibuffer t
                              helm-buffers-fuzzy-matching t
