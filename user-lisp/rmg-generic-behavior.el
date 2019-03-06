@@ -43,20 +43,23 @@
   (run-at-time 2 nil (lambda ()
                        (helm-mode 1)
 
-                       ;; Avoid slow loading later
-                       (rmg-try-require 'image-file)
-
                        ;; Other settings
                        (setq helm-prevent-escaping-from-minibuffer t
                              helm-buffers-fuzzy-matching t
-                             helm-man-or-woman-function 'woman))))
+                         helm-man-or-woman-function 'woman)
 
-  ;; And helm-projectile
-  ;;(when (fboundp 'projectile-global-mode)
-  ;;  (projectile-global-mode)
-  ;;  (setq projectile-completion-system 'helm
-  ;;        projectile-switch-project-action 'helm-projectile)
-  ;;  (helm-projectile-on)))
+                       ;; Avoid slow loading later by loading these now
+                       (rmg-try-require 'helm-net)
+                       (rmg-try-require 'helm-external)
+                       (rmg-try-require 'image-file)
+                       (rmg-try-require 'tramp))))
+
+;; And helm-projectile
+;;(when (fboundp 'projectile-global-mode)
+;;  (projectile-global-mode)
+;;  (setq projectile-completion-system 'helm
+;;        projectile-switch-project-action 'helm-projectile)
+;;  (helm-projectile-on)))
 
 ;; Allow recursive minibuffers (but not in helm)
 (setq enable-recursive-minibuffers t)

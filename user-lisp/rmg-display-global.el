@@ -37,11 +37,14 @@
 ;; Display search counts
 (global-anzu-mode 1)
 
+;; Don't show editorconfig in the mode line
+(when (rmg-try-require 'editorconfig)
+  (setq editorconfig-mode-lighter nil))
+
 ;; I love the code comments of diminish; yet I had to replace with delight
 (when (rmg-try-require 'delight)
   (delight '((anzu-mode nil "anzu")
               ;;(docker-mode nil "docker")
-             (editorconfig-mode nil "editorconfig-mode")
              (global-whitespace-mode nil "whitespace")
              (guide-key-mode nil "guide-key")
              (helm-mode nil "helm-mode")

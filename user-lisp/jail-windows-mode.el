@@ -188,7 +188,8 @@ status).")
                       "^\\*trace-output\\*$"
                       "^\\*vc\\(-diff\\|-log\\)?\\*$"
                       "^\\*\\(Wo\\)?Man"
-                      "^COMMIT_EDITMSG$")
+                      "^COMMIT_EDITMSG$"
+                      "^magit-\\(diff\\|commit\\)")
                 (completions "Completions\\*$"
                              "^\\*elisp macroexpansion\\*$"
                              "^\\*helm\\(-\\| \\)"
@@ -196,7 +197,8 @@ status).")
                              "^\\*magit"
                              "^\\*Process List\\*$"
                              "^\\*vc-dir\\*"
-                             "^ widget-choose$"))
+                             "^ widget-choose$"
+                             "^magit: "))
     (window-layout (| (size . 80)
                       (repeat . t))
                    (- (ratio . 0.66)
