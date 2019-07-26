@@ -42,7 +42,7 @@
                           org
                           ;;projectile
                           s
-                          smex
+                          ;;smex
                           undo-tree
                           yaml-mode
 
