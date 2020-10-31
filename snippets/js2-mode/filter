@@ -1,8 +1,0 @@
-# -*- mode: snippet -*-
-# name: filter
-# key: filter
-# --
-filter(function(${1:value, index, array}) {
-  $0
-  return ${3: true};
-}${2:, this})
