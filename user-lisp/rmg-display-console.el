@@ -1,1 +1,0 @@
-(provide 'rmg-display-console)
